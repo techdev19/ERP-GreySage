@@ -1,3 +1,4 @@
+backend/node_modules
 backend/.env
 backend/BRD.md
 
@@ -11,3 +12,4 @@ frontend/node_modules
 frontendv2
 
 .env
+*.zip
