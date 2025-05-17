@@ -28,7 +28,11 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://mongodb:27017/sales_accounting', {
+//mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin
+
+
+// mongoose.connect(process.env.MONGO_URI || 'mongodb://mongodb:27017/sales_accounting', {
+mongoose.connect('mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

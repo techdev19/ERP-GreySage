@@ -1,5 +1,5 @@
-### ERP-GreySage
+# ERP-GreySage
 
-# ERP solution for manufacturing based company
+## ERP solution for manufacturing based company
 
-# Nodejs + mongodb + Reactjs + docker
+## Nodejs + mongodb + Reactjs + docker

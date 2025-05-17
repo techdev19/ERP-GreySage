@@ -5,6 +5,6 @@ const { authenticateToken } = require('../middleware/auth');
 
 router.post('/stitching', authenticateToken, createStitching);
 router.put('/stitching/:id', authenticateToken, updateStitching);
-router.get('/stitching', authenticateToken, getStitching);
+router.get('/stitching/', authenticateToken, getStitching);
 
 module.exports = router;

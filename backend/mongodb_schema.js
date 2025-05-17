@@ -65,7 +65,7 @@ const FinishingVendorSchema = new mongoose.Schema({
 
 // Order Schema: Stage #1 - Client bulk orders
 const OrderSchema = new mongoose.Schema({
-  orderId: { type: String, required: true, unique: true }, // e.g., ORD-20250516001
+  orderId: { type: String, required: true, unique: true },
   date: { type: Date, required: true },
   clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
   fabric: { type: String, required: true },
@@ -77,15 +77,9 @@ const OrderSchema = new mongoose.Schema({
     quantity: { type: Number, required: true, min: 1 }
   }],
   description: { type: String },
-  status: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6], // 1: Order Placed, 2: Stitching, 3: Washing, 4: Finishing, 5: Complete, 6: Cancelled
-    default: 1
-  },
-  statusHistory: [{
-    status: { type: Number, enum: [1, 2, 3, 4, 5, 6] },
-    changedAt: { type: Date, default: Date.now }
-  }],
+  attachments: [{ fileName: String, url: String }],
+  status: { type: Number, enum: [1, 2, 3, 4, 5, 6], default: 1 },
+  statusHistory: [{ status: Number, changedAt: { type: Date, default: Date.now } }],
   createdAt: { type: Date, default: Date.now }
 });
 OrderSchema.index({ orderId: 1, clientId: 1 });
@@ -94,7 +88,7 @@ OrderSchema.index({ orderId: 1, clientId: 1 });
 const StitchingSchema = new mongoose.Schema({
   lotNumber: { type: String, required: true, unique: true }, // e.g., A/1/5
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  invoiceNumber: { type: String, ref: 'Invoice' },
+  invoiceNumber: { type: String, required: true },
   date: { type: Date, required: true },
   stitchOutDate: { type: Date },
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'StitchingVendor', required: true },
@@ -110,15 +104,15 @@ StitchingSchema.index({ lotNumber: 1, orderId: 1, vendorId: 1 });
 const WashingSchema = new mongoose.Schema({
   lotNumber: { type: String, required: true, unique: true },
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  invoiceNumber: { type: String, ref: 'Invoice' },
+  invoiceNumber: { type: String, required: true },
   date: { type: Date, required: true },
   washOutDate: { type: Date },
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'WashingVendor', required: true },
-  washColor: { type: String, required: true },
-  washCreation: { type: String, required: true },
-  // shade: { type: String, required: true }, merged to washCreation
-  // whisker: { type: String }, merged to washCreation
-  quantity: { type: Number, required: true, min: 1 },
+  washDetails: [{
+    washColor: { type: String, required: true },
+    washCreation: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 1 }
+  }],
   quantityShort: { type: Number, default: 0, min: 0 },
   rate: { type: Number, required: true, min: 0 },
   description: { type: String },

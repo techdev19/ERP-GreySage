@@ -1,16 +1,31 @@
 const { Stitching, Order } = require('../mongodb_schema');
-const { generateLotNumber } = require('../services/lotNumberService');
 const { updateVendorBalance } = require('../services/vendorBalanceService');
 const { logAction } = require('../utils/logger');
 
 const createStitching = async (req, res) => {
-  const { orderId, startBatch, endBatch, vendorId, waistSizes, quantity, quantityShort, rate, date, stitchOutDate, description } = req.body;
-  const lotNumber = await generateLotNumber(orderId, startBatch, endBatch);
+  const { lotNumber, orderId, invoiceNumber, vendorId, quantity, quantityShort, rate, date, stitchOutDate, description } = req.body;
+
+  // Validate required fields
+  if (!lotNumber) return res.status(400).json({ error: 'Lot number is required' });
+  if (!invoiceNumber) return res.status(400).json({ error: 'Invoice number is required' });
+
+  // Check totalQuantity against existing stitching entries
+  const order = await Order.findById(orderId);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+
+  const existingStitchings = await Stitching.find({ orderId });
+  const totalStitchedQuantity = existingStitchings.reduce((sum, stitching) => sum + stitching.quantity, 0);
+  const newTotal = totalStitchedQuantity + quantity;
+
+  if (newTotal > order.totalQuantity) {
+    return res.status(400).json({ error: `Total stitched quantity (${newTotal}) exceeds order's totalQuantity (${order.totalQuantity})` });
+  }
+
   const stitching = new Stitching({
     lotNumber,
     orderId,
+    invoiceNumber,
     vendorId,
-    waistSizes,
     quantity,
     quantityShort,
     rate,
@@ -19,11 +34,11 @@ const createStitching = async (req, res) => {
     description,
     createdAt: new Date()
   });
+
   try {
     await stitching.save();
     // Update the Order status to 2 (Order in Stitching)
-    const order = await Order.findById(orderId);
-    if (order && order.status < 2) {
+    if (order.status < 2) {
       order.status = 2;
       order.statusHistory.push({ status: 2, changedAt: new Date() });
       await order.save();
@@ -39,13 +54,16 @@ const createStitching = async (req, res) => {
 const updateStitching = async (req, res) => {
   const { stitchOutDate } = req.body;
   const stitching = await Stitching.findByIdAndUpdate(req.params.id, { stitchOutDate }, { new: true });
+  if (!stitching) return res.status(404).json({ error: 'Stitching record not found' });
   await logAction(req.user.userId, 'update_stitching', 'Stitching', stitching._id, 'Stitch out date updated');
   res.json(stitching);
 };
 
 const getStitching = async (req, res) => {
-  const { search } = req.query;
-  const query = search ? { lotNumber: { $regex: search, $options: 'i' } } : {};
+  const { search, orderId } = req.query;
+  const query = {};
+  if (search) query.lotNumber = { $regex: search, $options: 'i' };
+  if (orderId) query.orderId = orderId;
   const stitchingRecords = await Stitching.find(query).populate('orderId vendorId');
   res.json(stitchingRecords);
 };

@@ -20,6 +20,8 @@ import StitchingVendorCatalog from './components/StitchingVendorCatalog';
 import WashingVendorCatalog from './components/WashingVendorCatalog';
 import FinishingVendorCatalog from './components/FinishingVendorCatalog';
 import OrderManagement from './components/OrderManagement';
+import StitchingManagement from './components/StitchingManagement';
+import WashingManagement from './components/WashingManagement';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem('token');
@@ -73,6 +75,8 @@ function App() {
           <Route element={<AuthenticatedLayout variant={variant} setVariant={setVariant} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/orders" element={<OrderManagement />} />
+            <Route path="/stitching/:orderId" element={<StitchingManagement />} />
+            <Route path="/washing/:orderId" element={<WashingManagement />} />
             <Route path="/invoices" element={<InvoiceManagement />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/clients" element={<ClientCatalog />} />
