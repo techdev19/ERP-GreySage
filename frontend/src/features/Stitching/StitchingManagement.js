@@ -2,16 +2,20 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid } from '@mui/material';
-import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Close as CloseIcon } from '@mui/icons-material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { MorphDateTextField } from '../../components/MuiCustom';
+import dayjs from 'dayjs';
 import axios from 'axios';
 
-function WashingManagement() {
+function StitchingManagement() {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const [washingRecords, setWashingRecords] = useState([]);
+  const [stitchingRecords, setStitchingRecords] = useState([]);
   const [order, setOrder] = useState(null);
   const [vendors, setVendors] = useState([]);
-  const [stitchingRecords, setStitchingRecords] = useState([]);
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState({
@@ -19,27 +23,28 @@ function WashingManagement() {
     lotNumber: '',
     invoiceNumber: '',
     vendorId: '',
+    quantity: '',
     quantityShort: '',
     rate: '',
-    date: new Date().toISOString().split('T')[0],
-    washOutDate: '',
-    description: '',
-    washDetails: [{ washColor: '', washCreation: '', quantity: '' }]
+    date: dayjs(new Date()),
+    stitchOutDate: null,
+    description: ''
   });
+  const [totalStitchedQuantity, setTotalStitchedQuantity] = useState(0);
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
     try {
-      const [washingRes, orderRes, vendorsRes, stitchingRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/washing?orderId=${orderId}`, { headers: { Authorization: `Bearer ${token}` } }),
+      const [stitchingRes, orderRes, vendorsRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/stitching`, { params: {'orderId': orderId}, headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`http://localhost:5000/api/orders/${orderId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/washing-vendors', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`http://localhost:5000/api/stitching?orderId=${orderId}`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('http://localhost:5000/api/stitching-vendors', { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      setWashingRecords(washingRes.data);
+      setStitchingRecords(stitchingRes.data);
       setOrder(orderRes.data);
       setVendors(vendorsRes.data);
-      setStitchingRecords(stitchingRes.data);
+      const total = stitchingRes.data.reduce((sum, record) => sum + record.quantity, 0);
+      setTotalStitchedQuantity(total);
     } catch (err) {
       if (err.response?.status === 401) {
         alert('Session expired. Please log in again.');
@@ -55,53 +60,37 @@ function WashingManagement() {
   }, [orderId, token]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === 'quantity' || name === 'quantityShort' || name === 'rate') { value = parseInt(value) }
     setForm(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleDateChange = (e, name) => {
+      setForm(prev => ({ ...prev, [name]: dayjs(e) }));
+    };
 
   const handleSelectChange = (name, value) => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleWashDetailChange = (index, field, value) => {
-    setForm(prev => {
-      const newWashDetails = [...prev.washDetails];
-      newWashDetails[index] = { ...newWashDetails[index], [field]: value };
-      return { ...prev, washDetails: newWashDetails };
-    });
-  };
-
-  const addWashDetail = () => {
-    setForm(prev => ({
-      ...prev,
-      washDetails: [...prev.washDetails, { washColor: '', washCreation: '', quantity: '' }]
-    }));
-  };
-
-  const removeWashDetail = (index) => {
-    setForm(prev => ({
-      ...prev,
-      washDetails: prev.washDetails.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAddWashing = () => {
-    axios.post('http://localhost:5000/api/washing', form, {
+  const handleAddStitching = () => {
+    axios.post('http://localhost:5000/api/stitching', form, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
-        setWashingRecords([...washingRecords, res.data]);
+        setStitchingRecords([...stitchingRecords, res.data]);
+        setTotalStitchedQuantity(prev => prev + Number(form.quantity));
         setForm({
           orderId,
           lotNumber: '',
           invoiceNumber: '',
           vendorId: '',
+          quantity: '',
           quantityShort: '',
           rate: '',
           date: new Date().toISOString().split('T')[0],
-          washOutDate: '',
-          description: '',
-          washDetails: [{ washColor: '', washCreation: '', quantity: '' }]
+          stitchOutDate: null,
+          description: ''
         });
         setOpenModal(false);
       })
@@ -115,19 +104,19 @@ function WashingManagement() {
       });
   };
 
-  const handleUpdateWashOut = (id, washOutDate) => {
-    axios.put(`http://localhost:5000/api/washing/${id}`, { washOutDate }, {
+  const handleUpdateStitchOut = (id, stitchOutDate) => {
+    axios.put(`http://localhost:5000/api/stitching/${id}`, { stitchOutDate }, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
-        setWashingRecords(washingRecords.map(record => record._id === id ? res.data : record));
+        setStitchingRecords(stitchingRecords.map(record => record._id === id ? res.data : record));
       })
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {
-          alert('Washing record not found.');
+          alert('Stitching record not found.');
         } else {
           alert(err.response?.data?.error || 'An error occurred');
         }
@@ -158,17 +147,9 @@ function WashingManagement() {
       cell: ({ row }) => row.original.vendorId?.name || 'N/A'
     },
     {
-      accessorKey: 'washDetails',
-      header: 'Wash Details',
-      cell: ({ row }) => (
-        <Box>
-          {row.original.washDetails.map((wd, index) => (
-            <Typography key={index}>
-              Color: {wd.washColor}, Creation: {wd.washCreation}, Quantity: {wd.quantity}
-            </Typography>
-          ))}
-        </Box>
-      )
+      accessorKey: 'quantity',
+      header: 'Quantity',
+      enableSorting: true
     },
     {
       accessorKey: 'quantityShort',
@@ -181,16 +162,16 @@ function WashingManagement() {
       enableSorting: true
     },
     {
-      accessorKey: 'washOutDate',
-      header: 'Wash Out Date',
+      accessorKey: 'stitchOutDate',
+      header: 'Stitch Out Date',
       enableSorting: true,
       cell: ({ row }) => (
-        row.original.washOutDate ? (
-          new Date(row.original.washOutDate).toLocaleDateString()
+        row.original.stitchOutDate ? (
+          new Date(row.original.stitchOutDate).toLocaleDateString()
         ) : (
           <TextField
             type="date"
-            onChange={(e) => handleUpdateWashOut(row.original._id, e.target.value)}
+            onChange={(e) => handleUpdateStitchOut(row.original._id, e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
         )
@@ -200,7 +181,7 @@ function WashingManagement() {
 
   const table = useReactTable({
     columns,
-    data: washingRecords,
+    data: stitchingRecords,
     state: { globalFilter: search },
     onGlobalFilterChange: setSearch,
     getCoreRowModel: getCoreRowModel(),
@@ -214,11 +195,14 @@ function WashingManagement() {
   return (
     <Container sx={{ mt: 4 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h4">Washing Management</Typography>
+        <Typography variant="h4">Stitching Management</Typography>
         {order && (
-          <Box sx={{ mb: 2 }}>
-            <Typography>Order ID: {order.orderId}</Typography>
-            <Typography>Total Quantity: {order.totalQuantity}</Typography>
+          <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+            (
+            <Typography>Order ID: <><b>{order.orderId}</b></></Typography>
+            <Typography>Total Quantity: <><b>{order.totalQuantity}</b></></Typography>
+            <Typography>Stitched Quantity: <><b>{totalStitchedQuantity}</b></></Typography>
+            <Typography>Remaining Quantity: <><b>{order.totalQuantity - totalStitchedQuantity}</b></></Typography>)
           </Box>
         )}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -230,7 +214,7 @@ function WashingManagement() {
             sx={{ maxWidth: '190px' }}
           />
           <Button variant="contained" onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
-            Add Washing
+            Add Stitching
           </Button>
         </Box>
         <TableContainer>
@@ -275,8 +259,8 @@ function WashingManagement() {
         <Modal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          aria-labelledby="add-washing-modal"
-          aria-describedby="modal-to-add-new-washing"
+          aria-labelledby="add-stitching-modal"
+          aria-describedby="modal-to-add-new-stitching"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <Box
@@ -293,7 +277,7 @@ function WashingManagement() {
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" id="add-washing-modal">Add Washing</Typography>
+              <Typography variant="h6" id="add-stitching-modal">Add Stitching</Typography>
               <IconButton onClick={() => setOpenModal(false)}>
                 <CloseIcon />
               </IconButton>
@@ -338,6 +322,18 @@ function WashingManagement() {
               </Grid>
               <Grid size={{ xs: 6, md: 3 }}>
                 <TextField
+                  name="quantity"
+                  label="Quantity"
+                  type="number"
+                  value={form.quantity}
+                  onChange={handleChange}
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <TextField
                   name="quantityShort"
                   label="Quantity Short"
                   type="number"
@@ -360,75 +356,31 @@ function WashingManagement() {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <TextField
-                  name="date"
-                  label="Date"
-                  type="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
+              <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    name="date"
+                    label="Date"
+                    value={form.date}
+                    onChange={(e) => handleDateChange(e, 'date')}
+                    format='DD-MMM-YYYY'
+                    slots={{ textField: MorphDateTextField }}
+                    sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+                  />
+                </LocalizationProvider>
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <TextField
-                  name="washOutDate"
-                  label="Wash Out Date"
-                  type="date"
-                  value={form.washOutDate}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              {form.washDetails.map((wd, index) => (
-                <Grid container spacing={2} key={index} sx={{ alignItems: 'center' }}>
-                  <Grid size={{ xs: 6, md: 3 }}>
-                    <TextField
-                      label="Wash Color"
-                      value={wd.washColor}
-                      onChange={(e) => handleWashDetailChange(index, 'washColor', e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, md: 3 }}>
-                    <TextField
-                      label="Wash Creation"
-                      value={wd.washCreation}
-                      onChange={(e) => handleWashDetailChange(index, 'washCreation', e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, md: 3 }}>
-                    <TextField
-                      label="Quantity"
-                      type="number"
-                      value={wd.quantity}
-                      onChange={(e) => handleWashDetailChange(index, 'quantity', e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, md: 3 }}>
-                    <IconButton onClick={() => removeWashDetail(index)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              ))}
-              <Grid size={{ xs: 12 }}>
-                <Button variant="outlined" startIcon={<AddIcon />} onClick={addWashDetail}>
-                  Add Wash Detail
-                </Button>
+              <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    name="stitchOutDate"
+                    label={form.stitchOutDate && "Stitch Out Date"}
+                    value={form.stitchOutDate}
+                    onChange={(e) => handleDateChange(e, 'stitchOutDate')}
+                    format='DD-MMM-YYYY'
+                    slots={{ textField: MorphDateTextField }}
+                    sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+                  />
+                </LocalizationProvider>
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <TextField
@@ -444,7 +396,7 @@ function WashingManagement() {
                 />
               </Grid>
             </Grid>
-            <Button variant="contained" onClick={handleAddWashing} sx={{ mt: 2 }}>
+            <Button variant="contained" onClick={handleAddStitching} sx={{ mt: 2 }}>
               SAVE
             </Button>
           </Box>
@@ -454,4 +406,4 @@ function WashingManagement() {
   );
 }
 
-export default WashingManagement;
+export default StitchingManagement;

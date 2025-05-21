@@ -20,7 +20,7 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
-import ThemeToggle from '../App/shared-theme/ThemeToggle';
+import ThemeToggle from '../../components/Theme/ThemeToggle';
 import { Grid } from '@mui/material';
 
 const Card = styled(MuiCard)(({ theme }) => ({

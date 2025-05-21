@@ -5,7 +5,7 @@ const createOrder = async (req, res) => {
   const { date, clientId, fabric, fitStyleId, waistSize, totalQuantity, threadColors, description, attachments } = req.body;
 
   // Validate threadColors quantities
-  const totalThreadQuantity = threadColors.reduce((sum, tc) => sum + tc.quantity, 0);
+  const totalThreadQuantity = threadColors.reduce((sum, tc) => sum + parseInt(tc.quantity), 0);
   if (totalThreadQuantity !== totalQuantity) {
     return res.status(400).json({ error: `Sum of thread color quantities (${totalThreadQuantity}) must equal total quantity (${totalQuantity})` });
   }

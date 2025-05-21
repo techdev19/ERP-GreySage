@@ -4,6 +4,7 @@ import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel,
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
 import { Close as CloseIcon, AttachFile as AttachFileIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function OrderManagement() {
   const [orders, setOrders] = useState([]);
@@ -38,13 +39,13 @@ function OrderManagement() {
   const fetchData = async () => {
     try {
       const [ordersRes, clientsRes, fitStylesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/clients', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/fitstyles', { headers: { Authorization: `Bearer ${token}` } })
+        apiService.orders.getOrders(),
+        apiService.client.getClients(),
+        apiService.fitStyles.getFitstyles()
       ]);
-      setOrders(ordersRes.data);
-      setClients(clientsRes.data);
-      setFitStyles(fitStylesRes.data);
+      setOrders(ordersRes);
+      setClients(clientsRes);
+      setFitStyles(fitStylesRes);
     } catch (err) {
       if (err.response?.status === 401) {
         alert('Session expired. Please log in again.');
@@ -118,16 +119,14 @@ function OrderManagement() {
       return;
     }
 
-    if (!isNaN(form.totalQuantity)) {
+    if (isNaN(form.totalQuantity)) {
       alert('Total Quantity is not a number');
       return;
     }
 
-    axios.post('http://localhost:5000/api/orders', form, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.orders.createOrder(form)
       .then(res => {
-        setOrders([...orders, res.data]);
+        setOrders([...orders, res]);
         setForm({
           date: new Date().toISOString().split('T')[0],
           clientId: '',
@@ -140,15 +139,34 @@ function OrderManagement() {
           attachments: []
         });
         setOpenModal(false);
-      })
-      .catch(err => {
-        if (err.response?.status === 401) {
-          alert('Session expired. Please log in again.');
-          window.location.href = '/login';
-        } else {
-          alert(err.response?.data?.error || 'An error occurred');
-        }
       });
+
+    // axios.post('http://localhost:5000/api/orders', form, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // })
+    //   .then(res => {
+    //     setOrders([...orders, res.data]);
+    //     setForm({
+    //       date: new Date().toISOString().split('T')[0],
+    //       clientId: '',
+    //       fabric: '',
+    //       fitStyleId: '',
+    //       waistSize: '',
+    //       totalQuantity: '',
+    //       threadColors: [{ color: '', quantity: '' }],
+    //       description: '',
+    //       attachments: []
+    //     });
+    //     setOpenModal(false);
+    //   })
+    //   .catch(err => {
+    //     if (err.response?.status === 401) {
+    //       alert('Session expired. Please log in again.');
+    //       window.location.href = '/login';
+    //     } else {
+    //       alert(err.response?.data?.error || 'An error occurred');
+    //     }
+    //   });
   };
 
   const handleUpdateStatus = (id, newStatus) => {
