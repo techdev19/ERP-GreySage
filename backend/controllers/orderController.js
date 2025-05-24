@@ -45,7 +45,7 @@ const createOrder = async (req, res) => {
 
   try {
     await order.save();
-    await logAction(req.user.userId, 'create_order', 'Order', order._id, `Order ${orderId} created`);
+    //await logAction(req.user.userId, 'create_order', 'Order', order._id, `Order ${orderId} created`);
     res.status(201).json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -60,7 +60,7 @@ const updateOrderStatus = async (req, res) => {
   order.status = status;
   order.statusHistory.push({ status, changedAt: new Date() });
   await order.save();
-  await logAction(req.user.userId, 'update_order_status', 'Order', order._id, `Order status updated to ${status}`);
+  //await logAction(req.user.userId, 'update_order_status', 'Order', order._id, `Order status updated to ${status}`);
   res.json(order);
 };
 

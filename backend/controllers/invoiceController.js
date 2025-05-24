@@ -23,7 +23,7 @@ const createInvoice = async (req, res) => {
   balance.closingBalance = balance.startingBalance + balance.totalSales - balance.totalPayments;
   await balance.save();
 
-  await logAction(req.user.userId, 'create_invoice', 'Invoice', invoice._id, `Created invoice: ${invoiceNumber}`);
+  //await logAction(req.user.userId, 'create_invoice', 'Invoice', invoice._id, `Created invoice: ${invoiceNumber}`);
   res.status(201).json(invoice);
 };
 

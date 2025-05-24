@@ -23,6 +23,15 @@ const apiService = {
       }
     },
 
+    getOrderById: async (orderId) => {
+      try {
+        const response = await axiosInstance.get(`api/orders/${orderId}`);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
     updateOrderStatus: async (id, status) => {
       try {
         const response = await axiosInstance.put(`api/orders/${id}/status`, { status });
@@ -53,10 +62,10 @@ const apiService = {
       }
     },
 
-    getStitching: async (search = '') => {
+    getStitching: async (search = '', orderId = '', invoiceNumber = '') => {
       try {
         const response = await axiosInstance.get('api/stitching', {
-          params: { search },
+          params: { search, orderId, invoiceNumber },
         });
         return response.data;
       } catch (error) {
@@ -121,6 +130,127 @@ const apiService = {
       try {
         const response = await axiosInstance.get('api/finishing', {
           params: { search },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+  },
+
+  // Stitching Vendors API calls
+  stitchingVendors: {
+    createStitchingVendor: async (vendorData) => {
+      try {
+        const response = await axiosInstance.post('api/stitching-vendors', vendorData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    getStitchingVendors: async (search = '', showInactive = false) => {
+      try {
+        const response = await axiosInstance.get('api/stitching-vendors', {
+          params: { search, showInactive },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    toggleStitchingVendorActive: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/stitching-vendors/${id}/toggle-active`);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+  },
+
+  // Washing Vendors API calls
+  washingVendors: {
+    createWashingVendor: async (vendorData) => {
+      try {
+        const response = await axiosInstance.post('api/washing-vendors', vendorData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    getWashingVendors: async (search = '', showInactive = false) => {
+      try {
+        const response = await axiosInstance.get('api/washing-vendors', {
+          params: { search, showInactive },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    toggleWashingVendorActive: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/washing-vendors/${id}/toggle-active`);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+  },
+
+  // Finishing Vendors API calls
+  finishingVendors: {
+    createFinishingVendor: async (vendorData) => {
+      try {
+        const response = await axiosInstance.post('api/finishing-vendors', vendorData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    getFinishingVendors: async (search = '', showInactive = false) => {
+      try {
+        const response = await axiosInstance.get('api/finishing-vendors', {
+          params: { search, showInactive },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    toggleFinishingVendorActive: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/finishing-vendors/${id}/toggle-active`);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+  },
+
+  // Lot-related API calls
+  lots: {
+    searchByLotNumber: async (lotNumber, orderId) => {
+      try {
+        const response = await axiosInstance.get('api/lots/search/lotNumber', {
+          params: { lotNumber, orderId },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    searchByInvoiceNumber: async (invoiceNumber, orderId) => {
+      try {
+        const response = await axiosInstance.get('api/lots/search/invoiceNumber', {
+          params: { invoiceNumber, orderId },
         });
         return response.data;
       } catch (error) {

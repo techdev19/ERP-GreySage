@@ -84,11 +84,21 @@ const OrderSchema = new mongoose.Schema({
 });
 OrderSchema.index({ orderId: 1, clientId: 1 });
 
+const LotSchema = new mongoose.Schema({
+  lotNumber: { type: String, required: true, unique: true }, // e.g., A/1/5
+  invoiceNumber: { type: Number, required: true, unique: true },
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
+  date: { type: Date, required: true },
+  description: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+LotSchema.index({ lotNumber: 1, invoiceNumber: 1, orderId: 1 });
+
+
 // Stitching Schema: Stage #2 - Stitching/Making by vendors
 const StitchingSchema = new mongoose.Schema({
-  lotNumber: { type: String, required: true, unique: true }, // e.g., A/1/5
-  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  invoiceNumber: { type: String, required: true },
+  lotId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lot', required: true },
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },  date: { type: Date, required: true },
   date: { type: Date, required: true },
   stitchOutDate: { type: Date },
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'StitchingVendor', required: true },
@@ -98,13 +108,12 @@ const StitchingSchema = new mongoose.Schema({
   description: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
-StitchingSchema.index({ lotNumber: 1, orderId: 1, vendorId: 1 });
+StitchingSchema.index({ lotId: 1, orderId: 1, vendorId: 1 });
 
 // Washing Schema: Stage #3 - Washing by vendors
 const WashingSchema = new mongoose.Schema({
-  lotNumber: { type: String, required: true, unique: true },
-  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  invoiceNumber: { type: String, required: true },
+  lotId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lot', required: true },
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },  date: { type: Date, required: true },  
   date: { type: Date, required: true },
   washOutDate: { type: Date },
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'WashingVendor', required: true },
@@ -118,13 +127,12 @@ const WashingSchema = new mongoose.Schema({
   description: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
-WashingSchema.index({ lotNumber: 1, orderId: 1, vendorId: 1 });
+WashingSchema.index({ lotId: 1, orderId: 1, vendorId: 1 });
 
 // Finishing Schema: Stage #4 - Finishing by vendors
 const FinishingSchema = new mongoose.Schema({
-  lotNumber: { type: String, required: true, unique: true },
-  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  invoiceNumber: { type: String, ref: 'Invoice' },
+  lotId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lot', required: true },
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },  date: { type: Date, required: true },  
   date: { type: Date, required: true },
   finishOutDate: { type: Date },
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'FinishingVendor', required: true },
@@ -134,7 +142,7 @@ const FinishingSchema = new mongoose.Schema({
   description: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
-FinishingSchema.index({ lotNumber: 1, orderId: 1, vendorId: 1 });
+FinishingSchema.index({ lotId: 1, orderId: 1, vendorId: 1 });
 
 // VendorBalance Schema: Tracks payments and balances
 const VendorBalanceSchema = new mongoose.Schema({
@@ -206,6 +214,7 @@ module.exports = {
   WashingVendor: mongoose.model('WashingVendor', WashingVendorSchema),
   FinishingVendor: mongoose.model('FinishingVendor', FinishingVendorSchema),
   Order: mongoose.model('Order', OrderSchema),
+  Lot: mongoose.model('Lot', LotSchema),
   Stitching: mongoose.model('Stitching', StitchingSchema),
   Washing: mongoose.model('Washing', WashingSchema),
   Finishing: mongoose.model('Finishing', FinishingSchema),

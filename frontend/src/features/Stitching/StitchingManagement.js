@@ -8,7 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { MorphDateTextField } from '../../components/MuiCustom';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function StitchingManagement() {
   const { orderId } = useParams();
@@ -36,14 +36,14 @@ function StitchingManagement() {
   const fetchData = async () => {
     try {
       const [stitchingRes, orderRes, vendorsRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/stitching`, { params: {'orderId': orderId}, headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`http://localhost:5000/api/orders/${orderId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/stitching-vendors', { headers: { Authorization: `Bearer ${token}` } })
+        apiService.stitching.getStitching('', orderId, ''),
+        apiService.orders.getOrderById(orderId),
+        apiService.stitchingVendors.getStitchingVendors()
       ]);
-      setStitchingRecords(stitchingRes.data);
-      setOrder(orderRes.data);
-      setVendors(vendorsRes.data);
-      const total = stitchingRes.data.reduce((sum, record) => sum + record.quantity, 0);
+      setStitchingRecords(stitchingRes);
+      setOrder(orderRes);
+      setVendors(vendorsRes);
+      const total = stitchingRes.reduce((sum, record) => sum + record.quantity, 0);
       setTotalStitchedQuantity(total);
     } catch (err) {
       if (err.response?.status === 401) {
@@ -66,17 +66,15 @@ function StitchingManagement() {
   };
 
   const handleDateChange = (e, name) => {
-      setForm(prev => ({ ...prev, [name]: dayjs(e) }));
-    };
+    setForm(prev => ({ ...prev, [name]: dayjs(e) }));
+  };
 
   const handleSelectChange = (name, value) => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddStitching = () => {
-    axios.post('http://localhost:5000/api/stitching', form, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.stitching.createStitching(form)
       .then(res => {
         setStitchingRecords([...stitchingRecords, res.data]);
         setTotalStitchedQuantity(prev => prev + Number(form.quantity));
@@ -94,43 +92,23 @@ function StitchingManagement() {
         });
         setOpenModal(false);
       })
-      .catch(err => {
-        if (err.response?.status === 401) {
-          alert('Session expired. Please log in again.');
-          window.location.href = '/login';
-        } else {
-          alert(err.response?.data?.error || 'An error occurred');
-        }
-      });
   };
 
   const handleUpdateStitchOut = (id, stitchOutDate) => {
-    axios.put(`http://localhost:5000/api/stitching/${id}`, { stitchOutDate }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.stitching.updateStitching(id, dayjs(stitchOutDate))
       .then(res => {
         setStitchingRecords(stitchingRecords.map(record => record._id === id ? res.data : record));
       })
-      .catch(err => {
-        if (err.response?.status === 401) {
-          alert('Session expired. Please log in again.');
-          window.location.href = '/login';
-        } else if (err.response?.status === 404) {
-          alert('Stitching record not found.');
-        } else {
-          alert(err.response?.data?.error || 'An error occurred');
-        }
-      });
   };
 
   const columns = [
     {
-      accessorKey: 'lotNumber',
+      accessorKey: 'lotId.lotNumber',
       header: 'Lot Number',
       enableSorting: true
     },
     {
-      accessorKey: 'invoiceNumber',
+      accessorKey: 'lotId.invoiceNumber',
       header: 'Invoice Number',
       enableSorting: true
     },
@@ -141,7 +119,7 @@ function StitchingManagement() {
       cell: ({ row }) => new Date(row.original.date).toLocaleDateString()
     },
     {
-      accessorKey: 'vendorName',
+      accessorKey: 'vendorId.name',
       header: 'Vendor',
       enableSorting: true,
       cell: ({ row }) => row.original.vendorId?.name || 'N/A'
@@ -164,16 +142,31 @@ function StitchingManagement() {
     {
       accessorKey: 'stitchOutDate',
       header: 'Stitch Out Date',
+      size: 30,
       enableSorting: true,
       cell: ({ row }) => (
         row.original.stitchOutDate ? (
           new Date(row.original.stitchOutDate).toLocaleDateString()
         ) : (
-          <TextField
-            type="date"
-            onChange={(e) => handleUpdateStitchOut(row.original._id, e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
+          // <TextField
+          //   type="date"
+          //   onChange={(e) => handleUpdateStitchOut(row.original._id, e.target.value)}
+          //   InputLabelProps={{ shrink: true }}
+          // />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              name="date"
+              // label="Date"
+              value={form.stitchOutDate}
+              onChange={(e) => handleUpdateStitchOut(row.original._id, e)}
+              format='DD-MMM-YYYY'
+              slots={{ textField: MorphDateTextField, }}
+              slotProps={{ textField: { variant: 'filled' } }}
+              margin="normal"
+              variant="standard"
+              sx={{ width: 165 }}
+            />
+          </LocalizationProvider>
         )
       )
     }

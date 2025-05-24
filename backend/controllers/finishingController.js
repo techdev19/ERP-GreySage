@@ -26,7 +26,7 @@ const createFinishing = async (req, res) => {
       await order.save();
     }
     await updateVendorBalance(vendorId, 'finishing', lotNumber, orderId, quantity, rate);
-    await logAction(req.user.userId, 'create_finishing', 'Finishing', finishing._id, `Lot ${lotNumber} finished`);
+    //await logAction(req.user.userId, 'create_finishing', 'Finishing', finishing._id, `Lot ${lotNumber} finished`);
     res.status(201).json(finishing);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -43,7 +43,7 @@ const updateFinishing = async (req, res) => {
     order.statusHistory.push({ status: 5, changedAt: new Date() });
     await order.save();
   }
-  await logAction(req.user.userId, 'update_finishing', 'Finishing', finishing._id, 'Finish out date updated, ready for shipment');
+  //await logAction(req.user.userId, 'update_finishing', 'Finishing', finishing._id, 'Finish out date updated, ready for shipment');
   res.json(finishing);
 };
 

@@ -25,7 +25,7 @@ const createClient = async (req, res) => {
   const client = new Client({ name, clientCode, contact, email, address, isActive: true });
   try {
     await client.save();
-    await logAction(req.user.userId, 'create_client', 'Client', client._id, `Created client: ${client.name}`);
+    //await logAction(req.user.userId, 'create_client', 'Client', client._id, `Created client: ${client.name}`);
     res.status(201).json(client);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -46,7 +46,7 @@ const toggleClientActive = async (req, res) => {
 
   client.isActive = !client.isActive;
   await client.save();
-  await logAction(req.user.userId, 'toggle_client_active', 'Client', client._id, `Client ${client.name} ${client.isActive ? 'enabled' : 'disabled'}`);
+  //await logAction(req.user.userId, 'toggle_client_active', 'Client', client._id, `Client ${client.name} ${client.isActive ? 'enabled' : 'disabled'}`);
   res.json(client);
 };
 

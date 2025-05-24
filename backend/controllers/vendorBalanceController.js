@@ -14,7 +14,7 @@ const getVendorBalances = async (req, res) => {
 const recordVendorPayment = async (req, res) => {
   const { vendorId, vendorType, lotNumber, amount } = req.body;
   await recordPayment(vendorId, vendorType, lotNumber, amount);
-  await logAction(req.user.userId, `record_${vendorType}_payment`, 'VendorBalance', vendorId, `Recorded payment of ${amount} for ${vendorType} vendor`);
+  //await logAction(req.user.userId, `record_${vendorType}_payment`, 'VendorBalance', vendorId, `Recorded payment of ${amount} for ${vendorType} vendor`);
   res.json({ message: 'Payment recorded' });
 };
 

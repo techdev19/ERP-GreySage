@@ -4,7 +4,7 @@ const { logAction } = require('../utils/logger');
 const createFitStyle = async (req, res) => {
   const fitStyle = new FitStyle(req.body);
   await fitStyle.save();
-  await logAction(req.user.userId, 'create_fitstyle', 'FitStyle', fitStyle._id, `Created fit style: ${fitStyle.name}`);
+  //await logAction(req.user.userId, 'create_fitstyle', 'FitStyle', fitStyle._id, `Created fit style: ${fitStyle.name}`);
   res.status(201).json(fitStyle);
 };
 
@@ -22,7 +22,7 @@ const toggleFitStyleActive = async (req, res) => {
 
   fitStyle.isActive = !fitStyle.isActive;
   await fitStyle.save();
-  await logAction(req.user.userId, 'toggle_fitstyle_active', 'FitStyle', fitStyle._id, `FitStyle ${fitStyle.name} ${fitStyle.isActive ? 'enabled' : 'disabled'}`);
+  //await logAction(req.user.userId, 'toggle_fitstyle_active', 'FitStyle', fitStyle._id, `FitStyle ${fitStyle.name} ${fitStyle.isActive ? 'enabled' : 'disabled'}`);
   res.json(fitStyle);
 };
 

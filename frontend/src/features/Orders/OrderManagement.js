@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
 import { Close as CloseIcon, AttachFile as AttachFileIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
-import axios from 'axios';
 import apiService from '../../services/apiService';
 
 function OrderManagement() {
@@ -170,22 +169,10 @@ function OrderManagement() {
   };
 
   const handleUpdateStatus = (id, newStatus) => {
-    axios.put(`http://localhost:5000/api/orders/${id}/status`, { status: newStatus }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+      apiService.orders.updateOrderStatus(id, newStatus)
       .then(res => {
         fetchData();
       })
-      .catch(err => {
-        if (err.response?.status === 401) {
-          alert('Session expired. Please log in again.');
-          window.location.href = '/login';
-        } else if (err.response?.status === 404) {
-          alert('Order not found.');
-        } else {
-          alert(err.response?.data?.error || 'An error occurred');
-        }
-      });
   };
 
   const columns = [

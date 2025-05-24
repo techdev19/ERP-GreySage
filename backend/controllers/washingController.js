@@ -1,16 +1,18 @@
-const { Washing, Order, Stitching } = require('../mongodb_schema');
+const { Washing, Lot, Order, Stitching } = require('../mongodb_schema');
 const { updateVendorBalance } = require('../services/vendorBalanceService');
-const { logAction } = require('../utils/logger');
+// const { logAction } = require('../utils/logger');
 
 const createWashing = async (req, res) => {
-  const { lotNumber, orderId, invoiceNumber, vendorId, quantityShort, rate, date, washOutDate, description, washDetails } = req.body;
+  const { invoiceNumber, orderId, vendorId, quantityShort, rate, date, washOutDate, description, washDetails } = req.body;
 
-  // Validate required fields
-  if (!lotNumber) return res.status(400).json({ error: 'Lot number is required' });
-  if (!invoiceNumber) return res.status(400).json({ error: 'Invoice number is required' });
+  // Validate invoiceNumber and orderId
+    const lot = await Lot.findOne({ invoiceNumber, orderId });
+    if (!lot) {
+      return res.status(400).json({ error: 'Invalid invoiceNumber or orderId' });
+    }
 
   // Validate washDetails quantities against StitchingSchema quantity
-  const stitching = await Stitching.findOne({ lotNumber, orderId });
+  const stitching = await Stitching.findOne({ lotId: lot._id });
   if (!stitching) {
     return res.status(404).json({ error: 'Stitching record not found for this lot number and order' });
   }
@@ -21,16 +23,15 @@ const createWashing = async (req, res) => {
   }
 
   const washing = new Washing({
-    lotNumber,
+    lotId: lot._id,
     orderId,
-    invoiceNumber,
-    vendorId,
-    quantityShort,
-    rate,
     date,
     washOutDate,
-    description,
+    vendorId,
     washDetails,
+    quantityShort,
+    rate,
+    description,
     createdAt: new Date()
   });
 
@@ -45,7 +46,7 @@ const createWashing = async (req, res) => {
       await order.save();
     }
     await updateVendorBalance(vendorId, 'washing', lotNumber, orderId, totalWashQuantity, rate);
-    await logAction(req.user.userId, 'create_washing', 'Washing', washing._id, `Lot ${lotNumber} washed`);
+    //await logAction(req.user.userId, 'create_washing', 'Washing', washing._id, `Lot ${lotNumber} washed`);
     res.status(201).json(washing);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -56,16 +57,19 @@ const updateWashing = async (req, res) => {
   const { washOutDate } = req.body;
   const washing = await Washing.findByIdAndUpdate(req.params.id, { washOutDate }, { new: true });
   if (!washing) return res.status(404).json({ error: 'Washing record not found' });
-  await logAction(req.user.userId, 'update_washing', 'Washing', washing._id, 'Wash out date updated');
+  //await logAction(req.user.userId, 'update_washing', 'Washing', washing._id, 'Wash out date updated');
   res.json(washing);
 };
 
 const getWashing = async (req, res) => {
-  const { search, orderId } = req.query;
-  const query = {};
-  if (search) query.lotNumber = { $regex: search, $options: 'i' };
-  if (orderId) query.orderId = orderId;
-  const washingRecords = await Washing.find(query).populate('orderId vendorId');
+  const { search, invoiceNumber } = req.query;
+  let query = {};
+  if (search) {
+    query.lotId = { $in: await Lot.find({ lotNumber: { $regex: search, $options: 'i' } }).distinct('_id') };
+  } else if (invoiceNumber) {
+    query.lotId = { $in: await Lot.find({ invoiceNumber: { $regex: invoiceNumber, $options: 'i' } }).distinct('_id') };
+  }
+  const washingRecords = await Washing.find(query).populate('orderId vendorId lotId');
   res.json(washingRecords);
 };
 

@@ -30,7 +30,7 @@ const generateReport = async (req, res) => {
   });
   await report.save();
 
-  await logAction(req.user.userId, 'generate_report', 'Report', report._id, `Generated report for ${period}`);
+  //await logAction(req.user.userId, 'generate_report', 'Report', report._id, `Generated report for ${period}`);
   res.status(201).json(report);
 };
 
