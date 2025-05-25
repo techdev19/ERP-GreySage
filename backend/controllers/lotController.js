@@ -1,35 +1,46 @@
 const { Lot, Stitching, Washing, Finishing } = require('../mongodb_schema');
 
 const getLotNumber = async (req, res) => {
-    const { lotId } = req.body;
+  const { lotId } = req.body;
+  try {
     const lot = await Lot.findById(lotId);
+    if (!lot) return res.status(404).json({ error: 'Lot not found' });
     res.json(lot);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 const createLot = async (req, res) => {
-    const { lotId, invoiceNumber, orderId, date, description } = req.body;
+  const { lotNumber, invoiceNumber, orderId, date, description } = req.body;
 
-    // Validate required fields
-    if (!lotId) return res.status(400).json({ error: 'Lot number is required' });
-    if (!invoiceNumber) return res.status(400).json({ error: 'Invoice number is required' });
+  // Validate required fields
+  if (!lotNumber) return res.status(400).json({ error: 'Lot number is required' });
+  if (!invoiceNumber) return res.status(400).json({ error: 'Invoice number is required' });
+
+  try {
+    // Validate invoiceNumber as a number
+    const parsedInvoiceNumber = parseInt(invoiceNumber, 10);
+    if (isNaN(parsedInvoiceNumber)) {
+      return res.status(400).json({ error: 'Invoice number must be a valid number' });
+    }
 
     const lot = new Lot({
-        lotId,
-        invoiceNumber,
-        orderId,
-        date,
-        description,
-        createdAt: new Date()
+      lotNumber,
+      invoiceNumber: parsedInvoiceNumber,
+      orderId,
+      date: date,
+      description,
+      createdAt: new Date(),
     });
 
-    try {
-        await lot.save();
-        //await logAction(req.user.userId, 'create_lot', 'Lot', lot._id, `Lot ${lotId} created`);
-        res.status(201).json(lot);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}
+    await lot.save();
+    // await logAction(req.user.userId, 'create_lot', 'Lot', lot._id, `Lot ${lotNumber} created`);
+    res.status(201).json(lot);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 const searchByLotNumber = async (req, res) => {
   const { lotNumber, orderId } = req.query;
@@ -59,7 +70,12 @@ const searchByLotNumber = async (req, res) => {
 const searchByInvoiceNumber = async (req, res) => {
   const { invoiceNumber, orderId } = req.query;
   try {
-    const lot = await Lot.findOne({ invoiceNumber, orderId });
+    const parsedInvoiceNumber = parseInt(invoiceNumber, 10);
+    if (isNaN(parsedInvoiceNumber)) {
+      return res.status(400).json({ error: 'Invoice number must be a valid number' });
+    }
+
+    const lot = await Lot.findOne({ invoiceNumber: parsedInvoiceNumber, orderId });
     if (!lot) {
       return res.status(404).json({ error: 'Lot not found' });
     }

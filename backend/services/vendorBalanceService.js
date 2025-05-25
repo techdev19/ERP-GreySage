@@ -1,25 +1,39 @@
 const { VendorBalance } = require('../mongodb_schema');
 
-const updateVendorBalance = async (vendorId, vendorType, lotNumber, orderId, quantity, rate) => {
-  const totalAmount = quantity * rate;
-  await VendorBalance.findOneAndUpdate(
-    { vendorId, vendorType, lotNumber, orderId },
-    {
-      $inc: { totalAmount, remainingBalance: totalAmount },
-      $set: { lastUpdated: new Date() }
-    },
-    { upsert: true }
-  );
-};
+const updateVendorBalance = async (vendorId, vendorType, lotId, orderId, quantity, rate) => {
+  try {
+    const totalAmount = quantity * rate;
 
-const recordPayment = async (vendorId, vendorType, lotNumber, amount) => {
-  await VendorBalance.findOneAndUpdate(
-    { vendorId, vendorType, lotNumber },
-    {
-      $inc: { paymentsMade: amount, remainingBalance: -amount },
-      $set: { lastUpdated: new Date() }
+    // Find or create VendorBalance entry
+    let balance = await VendorBalance.findOne({
+      vendorId,
+      vendorType,
+      orderId,
+      lotId,
+    });
+
+    if (!balance) {
+      balance = new VendorBalance({
+        vendorId,
+        vendorType,
+        orderId,
+        lotId,
+        totalAmount,
+        paymentsMade: 0,
+        remainingBalance: totalAmount,
+        lastUpdated: new Date(),
+      });
+    } else {
+      balance.totalAmount += totalAmount;
+      balance.remainingBalance = balance.totalAmount - balance.paymentsMade;
+      balance.lastUpdated = new Date();
     }
-  );
+
+    await balance.save();
+    return balance;
+  } catch (error) {
+    throw new Error(`Failed to update vendor balance: ${error.message}`);
+  }
 };
 
-module.exports = { updateVendorBalance, recordPayment };
+module.exports = { updateVendorBalance };

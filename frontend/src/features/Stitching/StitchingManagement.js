@@ -74,7 +74,14 @@ function StitchingManagement() {
   };
 
   const handleAddStitching = () => {
-    apiService.stitching.createStitching(form)
+    let reqObj = form;
+    reqObj.lotNumber = reqObj.lotNumber.toUpperCase().replaceAll(' ', '');
+    reqObj.invoiceNumber = parseInt(reqObj.invoiceNumber);
+    reqObj.quantity = parseInt(reqObj.quantity);
+    reqObj.quantityShort = 0;
+    reqObj.rate = parseInt(reqObj.rate);
+    reqObj.stitchOutDate = null;
+    apiService.stitching.createStitching(reqObj)
       .then(res => {
         setStitchingRecords([...stitchingRecords, res.data]);
         setTotalStitchedQuantity(prev => prev + Number(form.quantity));
@@ -86,7 +93,7 @@ function StitchingManagement() {
           quantity: '',
           quantityShort: '',
           rate: '',
-          date: new Date().toISOString().split('T')[0],
+          date: dayjs(new Date()),
           stitchOutDate: null,
           description: ''
         });
@@ -260,9 +267,9 @@ function StitchingManagement() {
             sx={{
               position: 'absolute',
               top: '50%',
-              left: '58%',
+              left: '56%',
               transform: 'translate(-50%, -50%)',
-              width: '65%',
+              width: '50%',
               bgcolor: 'background.paper',
               borderRadius: 2,
               boxShadow: 24,
@@ -276,7 +283,20 @@ function StitchingManagement() {
               </IconButton>
             </Box>
             <Grid container spacing={2}>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 4 }} sx={{ alignContent: 'center' }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    name="date"
+                    label="Date"
+                    value={form.date}
+                    onChange={(e) => handleDateChange(e, 'date')}
+                    format='DD-MMM-YYYY'
+                    slots={{ textField: MorphDateTextField }}
+                    sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid size={{ xs: 6, md: 4 }}>
                 <TextField
                   name="lotNumber"
                   label="Lot Number"
@@ -287,7 +307,7 @@ function StitchingManagement() {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 4 }}>
                 <TextField
                   name="invoiceNumber"
                   label="Invoice Number"
@@ -298,7 +318,7 @@ function StitchingManagement() {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 4 }}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Vendor</InputLabel>
                   <Select
@@ -313,7 +333,7 @@ function StitchingManagement() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 4 }}>
                 <TextField
                   name="quantity"
                   label="Quantity"
@@ -325,7 +345,7 @@ function StitchingManagement() {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              {/* <Grid size={{ xs: 6, md: 3 }}>
                 <TextField
                   name="quantityShort"
                   label="Quantity Short"
@@ -336,8 +356,8 @@ function StitchingManagement() {
                   margin="normal"
                   variant="outlined"
                 />
-              </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              </Grid> */}
+              <Grid size={{ xs: 6, md: 4 }}>
                 <TextField
                   name="rate"
                   label="Rate"
@@ -349,20 +369,8 @@ function StitchingManagement() {
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    name="date"
-                    label="Date"
-                    value={form.date}
-                    onChange={(e) => handleDateChange(e, 'date')}
-                    format='DD-MMM-YYYY'
-                    slots={{ textField: MorphDateTextField }}
-                    sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
+
+              {/* <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     name="stitchOutDate"
@@ -374,7 +382,7 @@ function StitchingManagement() {
                     sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
                   />
                 </LocalizationProvider>
-              </Grid>
+              </Grid> */}
               <Grid size={{ xs: 12 }}>
                 <TextField
                   name="description"
