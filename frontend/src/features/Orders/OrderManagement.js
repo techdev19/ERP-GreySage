@@ -518,7 +518,7 @@ function OrderManagement() {
                 </Button>
               </Grid>
               <Grid size={{ xs: 12, md: 4 }} fullWidth>
-                <Button variant="contained" fullWidth onClick={handleAddOrder} sx={{ mt: 2 }}>
+                <Button variant="contained" fullWidth onClick={handleAddOrder}>
                   SAVE
                 </Button>
               </Grid>

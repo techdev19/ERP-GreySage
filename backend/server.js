@@ -29,11 +29,9 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-//mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin
+// mongoose.connect('mongodb://greysageadmin:tempPWD123@localhost:27017,localhost:27020,localhost:27021/sales_accounting?replicaSet=rs0&authSource=admin', {
 
-
-// mongoose.connect(process.env.MONGO_URI || 'mongodb://mongodb:27017/sales_accounting', {
-mongoose.connect('mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
