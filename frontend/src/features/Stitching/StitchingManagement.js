@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Paper, Typography, Box, Button } from '@mui/material';
+import { Container, Paper, Typography, Box, Button, TextField } from '@mui/material';
 import apiService from '../../services/apiService';
 import StitchingTable from './StitchingTable';
 import AddStitchingModal from './AddStitchingModal';
@@ -15,8 +15,9 @@ function StitchingManagement() {
   const [washingVendors, setWashingVendors] = useState([]);
   const [openStitchingModal, setOpenStitchingModal] = useState(false);
   const [openWashingModal, setOpenWashingModal] = useState(false);
-  const [selectedLot, setSelectedLot] = useState(null); // Store both lotNumber and lotId
+  const [selectedLot, setSelectedLot] = useState(null);
   const [totalStitchedQuantity, setTotalStitchedQuantity] = useState(0);
+  const [searchTerm, setSearchTerm] = useState(''); // Add search term state
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
@@ -97,7 +98,14 @@ function StitchingManagement() {
             <Typography>Remaining Quantity: <b>{order.totalQuantity - totalStitchedQuantity}</b></Typography>
           </Box>
         )}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <TextField
+            label="Search Stitching Records"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ width: '300px' }}
+            variant="outlined"
+          />
           <Button variant="contained" onClick={() => setOpenStitchingModal(true)} sx={{ mt: 2 }}>
             Add Stitching
           </Button>
@@ -110,6 +118,7 @@ function StitchingManagement() {
           handleUpdateWashOut={handleUpdateWashOut}
           setOpenWashingModal={setOpenWashingModal}
           setSelectedLot={setSelectedLot}
+          searchTerm={searchTerm} // Pass search term to StitchingTable
         />
         <AddStitchingModal
           open={openStitchingModal}
@@ -124,6 +133,7 @@ function StitchingManagement() {
           orderId={orderId}
           lotNumber={selectedLot?.lotNumber || ''}
           lotId={selectedLot?.lotId || ''}
+          invoiceNumber={selectedLot?.invoiceNumber || ''}
           vendors={washingVendors}
           onAddWashing={handleAddWashing}
         />

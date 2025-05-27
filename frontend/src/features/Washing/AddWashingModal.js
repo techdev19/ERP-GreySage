@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Modal, Typography, IconButton, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -8,10 +8,10 @@ import { MorphDateTextField } from '../../components/MuiCustom';
 import dayjs from 'dayjs';
 import apiService from '../../services/apiService';
 
-function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, vendors, onAddWashing }) {
+function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumber, vendors, onAddWashing }) {
   const [washingForm, setWashingForm] = useState({
     orderId,
-    lotNumber,
+    lotNumber: '',
     invoiceNumber: '',
     vendorId: '',
     quantityShort: '',
@@ -21,6 +21,15 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, vendors, on
     description: '',
     washDetails: [{ washColor: '', washCreation: '', quantity: '' }]
   });
+
+  // Synchronize lotNumber and invoiceNumber props with form state
+  useEffect(() => {
+    setWashingForm(prev => ({
+      ...prev,
+      lotNumber: lotNumber || '',
+      invoiceNumber: invoiceNumber || ''
+    }));
+  }, [lotNumber, invoiceNumber]);
 
   const handleWashingChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +72,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, vendors, on
         onAddWashing(lotId, res.data);
         setWashingForm({
           orderId,
-          lotNumber,
+          lotNumber: '',
           invoiceNumber: '',
           vendorId: '',
           quantityShort: '',
@@ -126,6 +135,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, vendors, on
               fullWidth
               margin="normal"
               variant="outlined"
+              disabled
             />
           </Grid>
           <Grid size={{ xs: 6, md: 3 }}>

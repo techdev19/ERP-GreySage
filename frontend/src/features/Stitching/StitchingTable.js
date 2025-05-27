@@ -15,7 +15,8 @@ function StitchingTable({
   handleUpdateStitchOut,
   handleUpdateWashOut,
   setOpenWashingModal,
-  setSelectedLot
+  setSelectedLot,
+  searchTerm // Receive search term
 }) {
   const [expandedRows, setExpandedRows] = useState({});
 
@@ -24,8 +25,7 @@ function StitchingTable({
       const newExpanded = { ...prev, [rowId]: !prev[rowId] };
       if (newExpanded[rowId]) {
         const row = stitchingRecords.find(r => r._id === rowId);
-        // if (row && row.lotId?._id && !washingRecords[row.lotId._id]) {
-        if (row && row.lotId?._id) {
+        if (row && row.lotId?._id && !washingRecords[row.lotId._id]) {
           fetchWashingRecords(row.lotId._id);
         }
       }
@@ -100,7 +100,11 @@ function StitchingTable({
             variant="contained"
             size="small"
             onClick={() => {
-              setSelectedLot({ lotNumber: row.original.lotId?.lotNumber || '', lotId: row.original.lotId?._id || '' });
+              setSelectedLot({
+                lotNumber: row.original.lotId?.lotNumber || '',
+                lotId: row.original.lotId?._id || '',
+                invoiceNumber: row.original.lotId?.invoiceNumber || ''
+              });
               setOpenWashingModal(true);
             }}
             sx={{ mr: 1 }}
@@ -120,7 +124,22 @@ function StitchingTable({
     data: stitchingRecords,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel()
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      globalFilter: searchTerm // Use searchTerm as the global filter
+    },
+    globalFilterFn: (row, columnId, filterValue) => {
+      // Custom global filter function to search across multiple fields
+      const lotNumber = row.original.lotId?.lotNumber?.toString().toLowerCase() || '';
+      const invoiceNumber = row.original.lotId?.invoiceNumber?.toString().toLowerCase() || '';
+      const vendorName = row.original.vendorId?.name?.toLowerCase() || '';
+      const search = filterValue.toLowerCase();
+      return (
+        lotNumber.includes(search) ||
+        invoiceNumber.includes(search) ||
+        vendorName.includes(search)
+      );
+    }
   });
 
   const getHeaderContent = (column) => column.columnDef && column.columnDef.header ? column.columnDef.header.toUpperCase() : column.id;
