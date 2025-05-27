@@ -94,10 +94,10 @@ const apiService = {
       }
     },
 
-    getWashing: async (search = '') => {
+    getWashing: async (search = '', lotId = '', invoiceNumber = '') => {
       try {
         const response = await axiosInstance.get('api/washing', {
-          params: { search },
+          params: { search, lotId, invoiceNumber },
         });
         return response.data;
       } catch (error) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
-import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
+import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Link, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
 import { Close as CloseIcon, AttachFile as AttachFileIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import apiService from '../../services/apiService';
 
@@ -27,11 +27,11 @@ function OrderManagement() {
   const navigate = useNavigate();
 
   const statusLabels = {
-    1: 'Order Placed',
-    2: 'Order in Stitching',
-    3: 'Order in Washing',
-    4: 'Order in Finishing',
-    5: 'Order Complete',
+    1: 'Placed',
+    2: 'Stitching',
+    3: 'Washing',
+    4: 'Finishing',
+    5: 'Complete',
     6: 'Cancelled'
   };
 
@@ -179,7 +179,12 @@ function OrderManagement() {
     {
       accessorKey: 'orderId',
       header: 'Order ID',
-      enableSorting: true
+      enableSorting: true,
+      cell: ({ row }) => (
+        <Box>
+          <Link component="button" onClick={() => navigate(`/stitching/${row.original._id}`)}>{row.original.orderId}</Link>
+        </Box>
+      )
     },
     {
       accessorKey: 'date',
@@ -243,8 +248,9 @@ function OrderManagement() {
       header: 'Status',
       enableSorting: true,
       cell: ({ row }) => (
-        <FormControl variant="outlined" size="small">
+        <FormControl variant="outlined" size="small" fullWidth>
           <Select
+            
             value={row.original.status}
             onChange={(e) => handleUpdateStatus(row.original._id, e.target.value)}
           >
@@ -255,20 +261,20 @@ function OrderManagement() {
         </FormControl>
       )
     },
-    {
-      accessorKey: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <Box>
-          <Button onClick={() => navigate(`/stitching/${row.original._id}`)} sx={{ mr: 1 }}>
-            Stitching
-          </Button>
-          <Button onClick={() => navigate(`/washing/${row.original._id}`)}>
-            Washing
-          </Button>
-        </Box>
-      )
-    }
+    // {
+    //   accessorKey: 'actions',
+    //   header: 'Actions',
+    //   cell: ({ row }) => (
+    //     <Box>
+    //       <Button onClick={() => navigate(`/stitching/${row.original._id}`)} sx={{ mr: 1 }}>
+    //         Stitching
+    //       </Button>
+    //       <Button onClick={() => navigate(`/washing/${row.original._id}`)}>
+    //         Washing
+    //       </Button>
+    //     </Box>
+    //   )
+    // }
   ];
 
   const table = useReactTable({

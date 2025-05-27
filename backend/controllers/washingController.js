@@ -32,7 +32,7 @@ const createWashing = async (req, res) => {
       return res.status(404).json({ error: 'Stitching record not found for this lot' });
     }
 
-    const totalWashQuantity = washDetails.reduce((sum, detail) => sum + (detail.quantity || 0), 0);
+    const totalWashQuantity = washDetails.reduce((sum, detail) => sum + parseInt(detail.quantity || 0), 0);
     if (totalWashQuantity !== stitching.quantity) {
       return res.status(400).json({ error: `Total quantity in washDetails (${totalWashQuantity}) must equal the stitching quantity (${stitching.quantity})` });
     }
@@ -83,11 +83,13 @@ const updateWashing = async (req, res) => {
 };
 
 const getWashing = async (req, res) => {
-  const { search, invoiceNumber } = req.query;
+  const { search, lotId, invoiceNumber } = req.query;
   try {
     let query = {};
     if (search) {
       query.lotId = { $in: await Lot.find({ lotNumber: { $regex: search, $options: 'i' } }).distinct('_id') };
+    } else if (lotId) {
+      query.lotId = lotId;
     } else if (invoiceNumber) {
       const parsedInvoiceNumber = parseInt(invoiceNumber, 10);
       if (isNaN(parsedInvoiceNumber)) {
