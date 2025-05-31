@@ -22,4 +22,4 @@ ENV MONGO_INITDB_ROOT_PASSWORD=tempPWD123
 EXPOSE 27017
 
 # Start MongoDB with replica set configuration
-ENTRYPOINT ["/bin/bash", "-c", "exec /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --bind_ip_all --port 27017"]
+ENTRYPOINT ["docker-entrypoint.sh", "mongod", "--replSet", "rs0", "--keyFile", "/data/keyfile.key", "--bind_ip_all", "--port", "27017"]
