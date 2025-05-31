@@ -14,8 +14,14 @@ RUN openssl rand -base64 756 > /data/keyfile.key && \
     chmod 400 /data/keyfile.key && \
     chown mongodb:mongodb /data/keyfile.key
 
+# Create custom entrypoint script
+RUN echo '#!/bin/bash\n\
+echo "Starting mongod with: /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --auth --bind_ip_all --port 27017"\n\
+exec /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --auth --bind_ip_all --port 27017\n' > /custom-entrypoint.sh && \
+    chmod +x /custom-entrypoint.sh
+
 # Expose MongoDB port
 EXPOSE 27017
 
-# Start MongoDB with replica set, authentication, and keyfile
-ENTRYPOINT ["docker-entrypoint.sh", "mongod", "--replSet", "rs0", "--keyFile", "/data/keyfile.key", "--auth", "--bind_ip_all", "--port", "27017"]
+# Use custom entrypoint
+ENTRYPOINT ["/custom-entrypoint.sh"]

@@ -3,6 +3,9 @@ print("Starting replica set initialization...");
 // Connect to admin database with authentication
 db = connect("mongodb://greysageadmin:tempPWD123@localhost:27017/admin?tls=false");
 
+// Check server status
+print("Server status:", JSON.stringify(db.serverStatus().repl, null, 2));
+
 let maxAttempts = 10;
 let attempt = 1;
 while (attempt <= maxAttempts) {
@@ -20,7 +23,7 @@ while (attempt <= maxAttempts) {
       print("Failed to initiate replica set after maximum attempts");
       throw e;
     }
-    sleep(1000); // Wait 1 second before retrying
+    sleep(2000); // Wait 2 seconds before retrying
     attempt++;
   }
 }
