@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import axios from 'axios';
+import authService from '../../services/authService';
 
 function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '', role: 'user' });
@@ -10,7 +10,7 @@ function Register() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleRegister = () => {
-    axios.post('http://localhost:5000/api/register', form)
+    authService.register(form)
       .then(() => {
         alert('Registration successful! Please login.');
         navigate('/login');

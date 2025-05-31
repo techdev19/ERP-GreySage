@@ -25,12 +25,24 @@ const errorHandler = require('./middleware/error');
 const app = express();
 
 // Middleware Setup
-app.use(cors());
+app.use(cors({
+  // origin: [
+  //   'https://urban-enigma-jxq7wq46vp5h7ww-8080.app.github.dev',
+  //   'http://localhost:8080', // For local development
+  //   'http://frontend:3000'  // For Docker-internal communication
+  // ],
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  // credentials: true // If your app uses cookies or auth headers
+}));
+
 app.use(express.json());
 
 // MongoDB Connection
-// mongoose.connect('mongodb://greysageadmin:tempPWD123@localhost:27017,localhost:27020,localhost:27021/sales_accounting?replicaSet=rs0&authSource=admin', {
+//mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin
 
+console.log(process.env.MONGO_URI)
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function StitchingVendorCatalog() {
   const [vendors, setVendors] = useState([]);
@@ -12,10 +12,11 @@ function StitchingVendorCatalog() {
   const token = localStorage.getItem('token');
 
   const getStitchingVendors = () => {
-    axios.get(`http://localhost:5000/api/stitching-vendors?search=${search}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setVendors(res.data))
+    // axios.get(`http://localhost:5000/api/stitching-vendors?search=${search}`, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // })
+    apiService.stitchingVendors.getStitchingVendors(search)
+      .then(res => setVendors(res))
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
@@ -33,11 +34,9 @@ function StitchingVendorCatalog() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAddVendor = () => {
-    axios.post('http://localhost:5000/api/stitching-vendors', form, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.stitchingVendors.createStitchingVendor(form)
       .then(res => {
-        setVendors([...vendors, res.data]);
+        setVendors([...vendors, res]);
         setForm({ name: '', contact: '', address: '' });
         setOpenModal(false);
       })
@@ -52,9 +51,7 @@ function StitchingVendorCatalog() {
   };
 
   const handleToggleActive = (id) => {
-    axios.put(`http://localhost:5000/api/stitching-vendors/${id}/toggle-active`, null, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.stitchingVendors.toggleStitchingVendorActive(id)
       .then(res => {
         getStitchingVendors();
       })

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function WashingVendorCatalog() {
   const [vendors, setVendors] = useState([]);
@@ -12,10 +12,8 @@ function WashingVendorCatalog() {
   const token = localStorage.getItem('token');
 
   const getWashingVendors = () => {
-    axios.get(`http://localhost:5000/api/washing-vendors?search=${search}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setVendors(res.data))
+    apiService.washingVendors.getWashingVendors(search)
+      .then(res => setVendors(res))
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
@@ -33,11 +31,9 @@ function WashingVendorCatalog() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAddVendor = () => {
-    axios.post('http://localhost:5000/api/washing-vendors', form, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.washingVendors.createWashingVendor(form)
       .then(res => {
-        setVendors([...vendors, res.data]);
+        setVendors([...vendors, res]);
         setForm({ name: '', contact: '', address: '' });
         setOpenModal(false);
       })
@@ -52,9 +48,7 @@ function WashingVendorCatalog() {
   };
 
   const handleToggleActive = (id) => {
-    axios.put(`http://localhost:5000/api/washing-vendors/${id}/toggle-active`, null, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.washingVendors.toggleWashingVendorActive(id)
       .then(res => {
         getWashingVendors();
       })

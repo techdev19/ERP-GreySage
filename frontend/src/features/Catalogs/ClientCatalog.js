@@ -3,6 +3,7 @@ import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel,
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function ClientCatalog() {
   const [clients, setClients] = useState([]);
@@ -12,9 +13,7 @@ function ClientCatalog() {
   const token = localStorage.getItem('token');
 
   const getClients = () => {
-    axios.get(`http://localhost:5000/api/clients?search=${search}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.client.getClients(search)
       .then(res => setClients(res.data))
       .catch(err => {
         if (err.response?.status === 401) {
@@ -53,14 +52,15 @@ function ClientCatalog() {
   };
 
   const handleAddClient = () => {
-    axios.post('http://localhost:5000/api/clients', {
-      ...form,
-      // clientCode: `${form.clientCodePrefix}-100` // Backend will handle increment
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    // axios.post('http://localhost:5000/api/clients', {
+    //   ...form,
+    //   // clientCode: `${form.clientCodePrefix}-100` // Backend will handle increment
+    // }, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // })
+    apiService.client.createClient(...form)
       .then(res => {
-        setClients([...clients, res.data]);
+        setClients([...clients, res]);
         setForm({ name: '', clientCodePrefix: '', contact: '', email: '', address: '' });
         setOpenModal(false);
       })
@@ -75,9 +75,7 @@ function ClientCatalog() {
   };
 
   const handleToggleActive = (id) => {
-    axios.put(`http://localhost:5000/api/clients/${id}/toggle-active`, null, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.client.updateClient(id)
       .then(res => {
         getClients();
       })
