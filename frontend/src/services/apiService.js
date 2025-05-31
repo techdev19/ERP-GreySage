@@ -260,6 +260,24 @@ const apiService = {
   },
 
   client: {
+    createClient: async (clientData) => {
+      try {
+        const response = await axiosInstance.post('api/clients', clientData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    updateClient: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/clients/${id}/toggle-active`, null);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
     getClients: async (search = '') => {
       try {
         const response = await axiosInstance.get('api/clients', {
@@ -273,11 +291,29 @@ const apiService = {
   },
 
   fitStyles: {
+    createFitstyles: async (fitStyleData) => {
+      try {
+        const response = await axiosInstance.post('api/fitstyles', fitStyleData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
     getFitstyles: async (search = '') => {
       try {
         const response = await axiosInstance.get('api/fitstyles', {
           params: { search },
         });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    toggleFitstyleActive: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/fitstyles/${id}/toggle-active`);
         return response.data;
       } catch (error) {
         throw error.response?.data || error.message;

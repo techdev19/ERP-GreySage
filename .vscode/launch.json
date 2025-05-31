@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Docker: Attach to Node",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "address": "localhost",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/",
+            "restart": true
+            // "protocol": "inspector"
+        },
+        {
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "name": "nodemon",
@@ -27,7 +38,7 @@
             ],
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
-            "program": "${workspaceFolder}\\backend\\server.js"
+            "program": "${workspaceFolder}/backend/server.js"
         }
     ]
 }

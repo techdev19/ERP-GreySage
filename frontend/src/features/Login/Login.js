@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import authService from '../../services/authService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -122,11 +122,10 @@ export default function Login({ variant, setVariant }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (validateInputs()) {
-      axios
-        .post('http://localhost:5000/api/login', form)
+      authService.login(form)
         .then((res) => {
-          localStorage.setItem('token', res.data.token);
-          localStorage.setItem('user', JSON.stringify(res.data.user));
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
           navigate('/dashboard');
         })
         .catch((err) => alert(err.response?.data?.error || 'Login failed'));
@@ -154,8 +153,8 @@ export default function Login({ variant, setVariant }) {
               labelId="theme-variant-label"
               value={variant}
               onChange={handleVariantChange}
-              // label="Theme"
-              // sx={{ width: 90 }}
+            // label="Theme"
+            // sx={{ width: 90 }}
             >
               <MenuItem value="purple">Purple</MenuItem>
               <MenuItem value="earthy">Earthy</MenuItem>
@@ -207,17 +206,17 @@ export default function Login({ variant, setVariant }) {
                 fullWidth
                 variant="outlined"
                 color={emailError ? 'error' : 'primary'}
-                // sx={{
-                //   '& .MuiInputBase-input': {
-                //     color: theme.palette.text.primary,
-                //   },
-                //   '& .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.divider,
-                //   },
-                //   '&:hover .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.text.secondary,
-                //   },
-                // }}
+              // sx={{
+              //   '& .MuiInputBase-input': {
+              //     color: theme.palette.text.primary,
+              //   },
+              //   '& .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.divider,
+              //   },
+              //   '&:hover .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.text.secondary,
+              //   },
+              // }}
               />
             </FormControl>
             <FormControl>
@@ -238,17 +237,17 @@ export default function Login({ variant, setVariant }) {
                 fullWidth
                 variant="outlined"
                 color={passwordError ? 'error' : 'primary'}
-                // sx={{
-                //   '& .MuiInputBase-input': {
-                //     color: theme.palette.text.primary,
-                //   },
-                //   '& .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.divider,
-                //   },
-                //   '&:hover .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.text.secondary,
-                //   },
-                // }}
+              // sx={{
+              //   '& .MuiInputBase-input': {
+              //     color: theme.palette.text.primary,
+              //   },
+              //   '& .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.divider,
+              //   },
+              //   '&:hover .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.text.secondary,
+              //   },
+              // }}
               />
             </FormControl>
             <FormControlLabel
@@ -260,26 +259,26 @@ export default function Login({ variant, setVariant }) {
             <Button type="submit" fullWidth variant="contained" size='medium'>
               Sign in
             </Button>
-            
+
           </Box>
           <Grid container spacing={2}>
-            <Grid item size={{xs: 12, sm: 6}}>
-            <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'start', md: 'start'}}>
-              {/* Don't have an account?{' '} */}
-              <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
-                Register
-              </Link>
-            </Typography>
-            
-            </Grid>
-            <Grid item size={{xs: 12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
+              <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'start', md: 'start' }}>
+                {/* Don't have an account?{' '} */}
+                <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
+                  Register
+                </Link>
+              </Typography>
 
-            <Typography sx={{color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'end', md: 'end'}}>
-              {/* Don't have an account?{' '} */}
-              <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
-              Forgot your password?
-              </Link>
-            </Typography>
+            </Grid>
+            <Grid item size={{ xs: 12, sm: 6 }}>
+
+              <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'end', md: 'end' }}>
+                {/* Don't have an account?{' '} */}
+                <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
+                  Forgot your password?
+                </Link>
+              </Typography>
             </Grid>
           </Grid>
           {/* <Divider sx={{ my: 0, color: theme.palette.text.secondary }}>or</Divider>

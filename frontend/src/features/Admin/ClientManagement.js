@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box } from '@mui/material';
 import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function ClientManagement() {
   const [clients, setClients] = useState([]);
@@ -9,11 +10,9 @@ function ClientManagement() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/clients?search=${search}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => setClients(res.data))
-      .catch(err => alert(err.response.data.error));
+    apiService.client.getClients(search)
+      .then(res => setClients(res))
+      .catch(err => alert(err.response.error));
   }, [search]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });

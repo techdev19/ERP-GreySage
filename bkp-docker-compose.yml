@@ -1,0 +1,58 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    entrypoint: >
+      /bin/bash -c '
+      
+      chmod 400 /data/keyfile.key &&
+      chown mongodb:mongodb /data/keyfile.key &&
+      /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --bind_ip_all'
+    # command: [ "--transitionToAuth", "-keyFile", "/keyfile", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./keyfile.key:/data/keyfile.key
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      # - sharedconfig:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=salesandaccounting
+    # healthcheck:
+    #   test: mongosh
+    #     -u $${MONGO_INITDB_ROOT_USERNAME}
+    #     -p $${MONGO_INITDB_ROOT_PASSWORD}
+    #     --eval "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017',priority:1}]}) }" | mongosh --port 27017 --quiet
+    #   interval: 5s
+    #   timeout: 30s
+    #   start_period: 0s
+    #   start_interval: 1s
+    #   retries: 30
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    environment:
+      - NODE_ENV=development  # Use development for npm start
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
+  mongodb_config:

@@ -15,19 +15,19 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=greysageadmin
       - MONGO_INITDB_ROOT_PASSWORD=tempPWD123
-    healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" | mongosh --port 27017 --quiet
-      interval: 5s
-      timeout: 30s
-      start_period: 10s
-      start_interval: 1s
-      retries: 3
+      # - MONGO_INITDB_DATABASE=admin
+    # healthcheck:
+    #   test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+    #   interval: 5s
+    #   timeout: 30s
+    #   start_period: 0s
+    #   start_interval: 1s
+    #   retries: 3
     volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-    networks:
-      - greysage-network
+      - ./keyfile.key:/data/keyfile.key
+      - "mongodb_data:/data/db"
+      - "mongodb_config:/data/configdb"
+
 
   backend:
     build:
@@ -36,13 +36,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://greysageadmin:tempPWD123@mongodb:27017/sales_accounting?replicaSet=rs0&authSource=admin
+      - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - greysage-network
+      - mongodb
 
   frontend:
     build:
@@ -51,11 +48,9 @@ services:
     ports:
       - "8080:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=development  # Use development for npm start
     depends_on:
       - backend
-    networks:
-      - greysage-network
 
 volumes:
   mongodb_data:

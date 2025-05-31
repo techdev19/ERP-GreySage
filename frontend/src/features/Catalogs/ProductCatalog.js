@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper, Divider } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function ProductCatalog() {
   const [products, setProducts] = useState([]);
@@ -12,10 +12,8 @@ function ProductCatalog() {
   const token = localStorage.getItem('token');
 
   const getFitStyles = () => {
-    axios.get(`http://localhost:5000/api/fitstyles?search=${search}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setProducts(res.data))
+    apiService.fitStyles.getFitstyles(search)
+      .then(res => setProducts(res))
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
@@ -33,11 +31,9 @@ function ProductCatalog() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAddProduct = () => {
-    axios.post('http://localhost:5000/api/fitstyles', form, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.fitStyles.createFitstyles(form)
       .then(res => {
-        setProducts([...products, res.data]);
+        setProducts([...products, res]);
         setForm({ name: '', description: '' });
         setOpenModal(false);
       })
@@ -52,9 +48,7 @@ function ProductCatalog() {
   };
 
   const handleDelete = (id) => {
-    axios.put(`http://localhost:5000/api/fitstyles/${id}/toggle-active`, null, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiService.fitStyles.toggleFitstyleActive(id)
       .then(res => {
         // Update the products list to reflect the new isActive status
         // setProducts(products.map(p => p._id === id ? res.data : p));
