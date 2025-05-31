@@ -291,7 +291,7 @@ const apiService = {
   },
 
   fitStyles: {
-    createFitStyles: async (fitStyleData) => {
+    createFitstyles: async (fitStyleData) => {
       try {
         const response = await axiosInstance.post('api/fitstyles', fitStyleData);
         return response.data;
@@ -300,18 +300,18 @@ const apiService = {
       }
     },
 
-    getFitStyles: async (search = '') => {
+    getFitstyles: async (search = '') => {
       try {
         const response = await axiosInstance.get('api/fitstyles', {
           params: { search },
-        });
+        }); 
         return response.data;
       } catch (error) {
         throw error.response?.data || error.message;
       }
     },
 
-    toggleFitStyleActive: async (id) => {
+    toggleFitstyleActive: async (id) => {
       try {
         const response = await axiosInstance.put(`api/fitstyles/${id}/toggle-active`);
         return response.data;

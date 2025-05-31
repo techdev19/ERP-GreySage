@@ -13,7 +13,7 @@ function ProductCatalog() {
   const token = localStorage.getItem('token');
 
   const getFitStyles = () => {
-    apiService.fitStyles.getFitStyles(search)
+    apiService.fitStyles.getFitstyles(search)
       .then(res => setProducts(res))
       .catch(err => {
         if (err.response?.status === 401) {
@@ -32,7 +32,7 @@ function ProductCatalog() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAddProduct = () => {
-    apiService.fitStyles.createFitStyles(form)
+    apiService.fitStyles.createFitstyles(form)
       .then(res => {
         setProducts([...products, res]);
         setForm({ name: '', description: '' });
@@ -49,7 +49,7 @@ function ProductCatalog() {
   };
 
   const handleDelete = (id) => {
-    apiService.fitStyles.toggleFitStyleActive(id)
+    apiService.fitStyles.toggleFitstyleActive(id)
       .then(res => {
         // Update the products list to reflect the new isActive status
         // setProducts(products.map(p => p._id === id ? res.data : p));
