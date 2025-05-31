@@ -14,12 +14,8 @@ RUN openssl rand -base64 756 > /data/keyfile.key && \
     chmod 400 /data/keyfile.key && \
     chown mongodb:mongodb /data/keyfile.key
 
-# Set environment variables
-ENV MONGO_INITDB_ROOT_USERNAME=greysageadmin
-ENV MONGO_INITDB_ROOT_PASSWORD=tempPWD123
-
 # Expose MongoDB port
 EXPOSE 27017
 
-# Start MongoDB with replica set configuration
-ENTRYPOINT ["docker-entrypoint.sh", "mongod", "--replSet", "rs0", "--keyFile", "/data/keyfile.key", "--bind_ip_all", "--port", "27017"]
+# Start MongoDB with replica set, authentication, and keyfile
+ENTRYPOINT ["docker-entrypoint.sh", "mongod", "--replSet", "rs0", "--keyFile", "/data/keyfile.key", "--auth", "--bind_ip_all", "--port", "27017"]
