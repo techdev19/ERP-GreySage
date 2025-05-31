@@ -260,6 +260,8 @@ const apiService = {
   },
 
   client: {
+    createClient: async (clientData) => {
+      try {
         const response = await axiosInstance.post('api/clients', clientData);
         return response.data;
       } catch (error) {
