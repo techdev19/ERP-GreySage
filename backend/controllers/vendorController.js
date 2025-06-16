@@ -1,4 +1,4 @@
-const { StitchingVendor, WashingVendor, FinishingVendor } = require('../mongodb_schema');
+const { FabricVendor, StitchingVendor, WashingVendor, FinishingVendor } = require('../mongodb_schema');
 const { logAction } = require('../utils/logger');
 
 const createVendor = async (req, res, Model, vendorType) => {
@@ -26,25 +26,31 @@ const toggleVendorActive = async (req, res, Model, vendorType) => {
   res.json(vendor);
 };
 
+const createFabricVendor = async (req, res) => createVendor(req, res, FabricVendor, 'FabricVendor');
 const createStitchingVendor = async (req, res) => createVendor(req, res, StitchingVendor, 'StitchingVendor');
 const createWashingVendor = async (req, res) => createVendor(req, res, WashingVendor, 'WashingVendor');
 const createFinishingVendor = async (req, res) => createVendor(req, res, FinishingVendor, 'FinishingVendor');
 
+const getFabricVendors = async (req, res) => getVendors(req, res, FabricVendor);
 const getStitchingVendors = async (req, res) => getVendors(req, res, StitchingVendor);
 const getWashingVendors = async (req, res) => getVendors(req, res, WashingVendor);
 const getFinishingVendors = async (req, res) => getVendors(req, res, FinishingVendor);
 
+const toggleFabricVendorActive = async (req, res) => toggleVendorActive(req, res, FabricVendor, 'FabricVendor');
 const toggleStitchingVendorActive = async (req, res) => toggleVendorActive(req, res, StitchingVendor, 'StitchingVendor');
 const toggleWashingVendorActive = async (req, res) => toggleVendorActive(req, res, WashingVendor, 'WashingVendor');
 const toggleFinishingVendorActive = async (req, res) => toggleVendorActive(req, res, FinishingVendor, 'FinishingVendor');
 
 module.exports = {
+  createFabricVendor,
   createStitchingVendor,
   createWashingVendor,
   createFinishingVendor,
+  getFabricVendors,
   getStitchingVendors,
   getWashingVendors,
   getFinishingVendors,
+  toggleFabricVendorActive,
   toggleStitchingVendorActive,
   toggleWashingVendorActive,
   toggleFinishingVendorActive

@@ -17,6 +17,7 @@ import Dashboard from './features/Admin/Dashboard';
 
 import ClientCatalog from './features/Catalogs/ClientCatalog';
 import ProductCatalog from './features/Catalogs/ProductCatalog';
+import FabricVendorCatalog from './features/Catalogs/FabricVendorCatalog';
 import StitchingVendorCatalog from './features/Catalogs/StitchingVendorCatalog';
 import WashingVendorCatalog from './features/Catalogs/WashingVendorCatalog';
 import FinishingVendorCatalog from './features/Catalogs/FinishingVendorCatalog';
@@ -82,6 +83,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/clients" element={<ClientCatalog />} />
             <Route path="/products" element={<ProductCatalog />} />
+            <Route path="/fabric-vendors" element={<FabricVendorCatalog />} />
             <Route path="/stitching-vendors" element={<StitchingVendorCatalog />} />
             <Route path="/washing-vendors" element={<WashingVendorCatalog />} />
             <Route path="/finishing-vendors" element={<FinishingVendorCatalog />} />

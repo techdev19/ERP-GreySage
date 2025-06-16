@@ -2,66 +2,39 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from 'axios';
 import apiService from '../../services/apiService';
 
-function ClientCatalog() {
-  const [clients, setClients] = useState([]);
-  const [form, setForm] = useState({ name: '', clientCodePrefix: '', contact: '', email: '', address: '' });
+function FabricVendorCatalog() {
+  const [vendors, setVendors] = useState([]);
+  const [form, setForm] = useState({ name: '', contact: '', address: '' });
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const token = localStorage.getItem('token');
 
-  const getClients = () => {
-    apiService.client.getClients(search)
-      .then(res => setClients(res))
+  const getFabricVendors = () => {
+    apiService.fabricVendors.getFabricVendors(search)
+      .then(res => setVendors(res))
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
-          alert(err.response?.error || 'An error occurred');
+          alert(err.response?.data?.error || 'An error occurred');
         }
       });
   };
 
   useEffect(() => {
-    getClients();
+    getFabricVendors();
   }, [search, token]);
 
-  const generateClientCodePrefix = (name) => {
-    if (!name) return '';
-    const words = name.trim().split(/\s+/);
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'name') {
-      setForm(prev => ({
-        ...prev,
-        name: value,
-        clientCodePrefix: generateClientCodePrefix(value)
-      }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleAddClient = () => {
-    // axios.post('http://localhost:5000/api/clients', {
-    //   ...form,
-    //   // clientCode: `${form.clientCodePrefix}-100` // Backend will handle increment
-    // }, {
-    //   headers: { Authorization: `Bearer ${token}` }
-    // })
-    apiService.client.createClient(...form)
+  const handleAddVendor = () => {
+    apiService.fabricVendors.createFabricVendor(form)
       .then(res => {
-        setClients([...clients, res]);
-        setForm({ name: '', clientCodePrefix: '', contact: '', email: '', address: '' });
+        setVendors([...vendors, res]);
+        setForm({ name: '', contact: '', address: '' });
         setOpenModal(false);
       })
       .catch(err => {
@@ -75,16 +48,16 @@ function ClientCatalog() {
   };
 
   const handleToggleActive = (id) => {
-    apiService.client.updateClient(id)
+    apiService.fabricVendors.toggleFabricVendorActive(id)
       .then(res => {
-        getClients();
+        getFabricVendors();
       })
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {
-          alert('Client not found.');
+          alert('Fabric vendor not found.');
         } else {
           alert(err.response?.error || 'An error occurred');
         }
@@ -98,18 +71,8 @@ function ClientCatalog() {
       enableSorting: true
     },
     {
-      accessorKey: 'clientCode',
-      header: 'Client Code',
-      enableSorting: true
-    },
-    {
       accessorKey: 'contact',
       header: 'Contact',
-      enableSorting: true
-    },
-    {
-      accessorKey: 'email',
-      header: 'Email',
       enableSorting: true
     },
     {
@@ -127,17 +90,17 @@ function ClientCatalog() {
         </Button>
       )
     },
-    // {
-    //   accessorKey: 'isActive',
-    //   header: 'Status',
-    //   enableSorting: true,
-    //   cell: ({ row }) => (row.original.isActive ? 'Active' : 'Inactive')
-    // }
+    {
+      accessorKey: 'isActive',
+      header: 'Status',
+      enableSorting: true,
+      cell: ({ row }) => (row.original.isActive ? 'Active' : 'Inactive')
+    }
   ];
 
   const table = useReactTable({
     columns,
-    data: clients,
+    data: vendors,
     state: { globalFilter: search },
     onGlobalFilterChange: setSearch,
     getCoreRowModel: getCoreRowModel(),
@@ -151,7 +114,7 @@ function ClientCatalog() {
   return (
     <Container sx={{ mt: 4 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h4">Client Catalog</Typography>
+        <Typography variant="h4">Fabric Vendor Catalog</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
           <TextField
             label="Search"
@@ -162,7 +125,7 @@ function ClientCatalog() {
             sx={{ maxWidth: '190px' }}
           />
           <Button variant="contained" onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
-            Add Client
+            Add Fabric Vendor
           </Button>
         </Box>
         <TableContainer>
@@ -207,8 +170,8 @@ function ClientCatalog() {
         <Modal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          aria-labelledby="add-client-modal"
-          aria-describedby="modal-to-add-new-client"
+          aria-labelledby="add-vendor-modal"
+          aria-describedby="modal-to-add-new-vendor"
         >
           <Box
             sx={{
@@ -224,7 +187,7 @@ function ClientCatalog() {
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" id="add-client-modal">Add Client</Typography>
+              <Typography variant="h6" id="add-vendor-modal">Add Fabric Vendor</Typography>
               <IconButton onClick={() => setOpenModal(false)}>
                 <CloseIcon />
               </IconButton>
@@ -239,28 +202,9 @@ function ClientCatalog() {
               variant="outlined"
             />
             <TextField
-              name="clientCodePrefix"
-              label="Client Code Prefix (Suggested)"
-              value={form.clientCodePrefix}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              helperText="Edit the suggested prefix if needed"
-            />
-            <TextField
               name="contact"
               label="Contact"
               value={form.contact}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              name="email"
-              label="Email"
-              value={form.email}
               onChange={handleChange}
               fullWidth
               margin="normal"
@@ -275,7 +219,7 @@ function ClientCatalog() {
               margin="normal"
               variant="outlined"
             />
-            <Button variant="contained" onClick={handleAddClient} sx={{ mt: 2 }}>
+            <Button variant="contained" onClick={handleAddVendor} sx={{ mt: 2 }}>
               SAVE
             </Button>
           </Box>
@@ -285,4 +229,4 @@ function ClientCatalog() {
   );
 }
 
-export default ClientCatalog;
+export default FabricVendorCatalog;

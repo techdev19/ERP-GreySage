@@ -108,9 +108,38 @@ const createStitching = async (req, res) => {
 };
 
 const updateStitching = async (req, res) => {
-  const { stitchOutDate } = req.body;
+  const { id, lotNumber, orderId, invoiceNumber, vendorId, quantity, quantityShort, rate, date, stitchOutDate, description } = req.body;
+  
   try {
-    const stitching = await Stitching.findByIdAndUpdate(req.params.id, { stitchOutDate }, { new: true });
+    // Check totalQuantity against existing stitching entries
+    const stitch = await Stitching.findById(id);
+    if (!stitch) return res.status(404).json({ error: 'Stitching record not found for update operation' });
+
+    if (stitch.quantity !== quantity) {
+      const existingStitchings = await Stitching.find({ orderId });
+      const totalStitchedQuantity = existingStitchings.reduce((sum, stitching) => sum + stitching.quantity, 0);
+      const newTotal = totalStitchedQuantity + quantity;
+
+      if (newTotal > order.totalQuantity) {
+        return res.status(400).json({ error: `Total stitched quantity (${newTotal}) exceeds order's totalQuantity (${order.totalQuantity})` });
+      }
+    }
+    
+
+    // Validate lotNumber and invoiceNumber uniqueness
+    const existingLot = await Lot.findOne({
+      $or: [{ lotNumber }, { invoiceNumber }],
+    });
+    if (existingLot) {
+      if (existingLot.lotNumber === lotNumber) {
+        return res.status(400).json({ error: 'Lot number already exists' });
+      }
+      if (existingLot.invoiceNumber === invoiceNumber) {
+        return res.status(400).json({ error: 'Invoice number already exists' });
+      }
+    }
+
+    const stitching = await Stitching.findByIdAndUpdate(req.params.id, { stitchOutDate }, { new: true, runValidators: true });
     if (!stitching) return res.status(404).json({ error: 'Stitching record not found' });
     // await logAction(req.user.userId, 'update_stitching', 'Stitching', stitching._id, 'Stitch out date updated');
     res.json(stitching);

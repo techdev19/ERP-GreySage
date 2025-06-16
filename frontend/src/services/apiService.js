@@ -53,9 +53,9 @@ const apiService = {
       }
     },
 
-    updateStitching: async (id, stitchOutDate) => {
+    updateStitching: async (stitchingData) => {
       try {
-        const response = await axiosInstance.put(`api/stitching/${id}`, { stitchOutDate });
+        const response = await axiosInstance.put('api/stitching', stitchingData);
         return response.data;
       } catch (error) {
         throw error.response?.data || error.message;
@@ -131,6 +131,38 @@ const apiService = {
         const response = await axiosInstance.get('api/finishing', {
           params: { search },
         });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+  },
+
+  // Fabric Vendors API calls
+  fabricVendors: {
+    createFabricVendor: async (vendorData) => {
+      try {
+        const response = await axiosInstance.post('api/fabric-vendors', vendorData);
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    getFabricVendors: async (search = '', showInactive = false) => {
+      try {
+        const response = await axiosInstance.get('api/fabric-vendors', {
+          params: { search, showInactive },
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error.message;
+      }
+    },
+
+    toggleFabricVendorActive: async (id) => {
+      try {
+        const response = await axiosInstance.put(`api/fabric-vendors/${id}/toggle-active`);
         return response.data;
       } catch (error) {
         throw error.response?.data || error.message;

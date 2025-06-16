@@ -4,7 +4,7 @@ const { createStitching, updateStitching, getStitching } = require('../controlle
 const { authenticateToken } = require('../middleware/auth');
 
 router.post('/stitching', authenticateToken, createStitching);
-router.put('/stitching/:id', authenticateToken, updateStitching);
+router.put('/stitching', authenticateToken, updateStitching);
 router.get('/stitching/', authenticateToken, getStitching);
 
 module.exports = router;

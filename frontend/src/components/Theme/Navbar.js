@@ -13,6 +13,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import AuditIcon from '@mui/icons-material/History';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DryCleaningIcon from '@mui/icons-material/DryCleaning';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
 import LaundryIcon from '@mui/icons-material/LocalLaundryService';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -42,7 +43,8 @@ function Navbar({ variant, setVariant }) {
     { label: 'Invoices', path: '/invoices', icon: <ReceiptIcon /> },
     { label: 'Clients', path: '/clients', icon: <PeopleIcon /> },
     { label: 'Fit Style', path: '/products', icon: <InventoryIcon /> },
-    { label: 'Stitching Vendors', path: '/stitching-vendors', icon: <DryCleaningIcon /> },
+    { label: 'Fabric Vendors', path: '/fabric-vendors', icon: <DryCleaningIcon /> },
+    { label: 'Stitching Vendors', path: '/stitching-vendors', icon: <ContentCutIcon /> },
     { label: 'Washing Vendors', path: '/washing-vendors', icon: <LaundryIcon /> },
     { label: 'Finishing Vendors', path: '/finishing-vendors', icon: <AutoAwesomeIcon /> },
     { label: 'Reports', path: '/reports', icon: <AssessmentIcon /> },

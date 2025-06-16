@@ -36,6 +36,15 @@ const FitStyleSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// FabricVendor Schema: Lookup for fabric vendors
+const FabricVendorSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  contact: { type: String },
+  address: { type: String },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
 // StitchingVendor Schema: Lookup for stitching vendors
 const StitchingVendorSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
@@ -72,6 +81,7 @@ const OrderSchema = new mongoose.Schema({
   fitStyleId: { type: mongoose.Schema.Types.ObjectId, ref: 'FitStyle', required: true },
   waistSize: { type: String, required: true },
   totalQuantity: { type: Number, required: true, min: 1 },
+  actualTotalQuantity: { type: Number, default: 0 },
   threadColors: [{
     color: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 }
@@ -93,7 +103,6 @@ const LotSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 LotSchema.index({ lotNumber: 1, invoiceNumber: 1, orderId: 1 });
-
 
 // Stitching Schema: Stage #2 - Stitching/Making by vendors
 const StitchingSchema = new mongoose.Schema({
@@ -210,6 +219,7 @@ module.exports = {
   User: mongoose.model('User', UserSchema),
   Client: mongoose.model('Client', ClientSchema),
   FitStyle: mongoose.model('FitStyle', FitStyleSchema),
+  FabricVendor: mongoose.model('FabricVendor', FabricVendorSchema),
   StitchingVendor: mongoose.model('StitchingVendor', StitchingVendorSchema),
   WashingVendor: mongoose.model('WashingVendor', WashingVendorSchema),
   FinishingVendor: mongoose.model('FinishingVendor', FinishingVendorSchema),
