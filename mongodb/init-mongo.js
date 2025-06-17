@@ -25,19 +25,19 @@ print("Server status:", JSON.stringify(db.serverStatus().repl, null, 2));
 let rsStatus;
 try {
     rsStatus = rs.status();
-    print("Replica set status:", JSON.stringify(rsStatus, null, 2));
+    print("rsStatus:", JSON.stringify(rsStatus, null, 2));
     if (rsStatus.ok === 1) {
         print("Replica set already initialized");
         quit(0);
     }
 } catch (e) {
-    print("Replica set not yet initialized:", e);
+    print("Replica set not yet initialized: ", e);
 }
 
 let maxAttempts = 10;
 let attempt = 1;
 let mongoHost = process.env.MONGO_HOST || "localhost";
-sleep(5000); // Wait 5 seconds to ensure server is ready
+sleep(10000); // Wait 10 seconds to ensure server is ready
 while (attempt <= maxAttempts) {
     try {
         print("Attempting to initiate replica set...");

@@ -1,3 +1,5 @@
 #!/bin/bash
 set -e
-exec mongod --config /etc/mongod.conf
+echo "Running entrypoint.sh..."
+ls -l /docker-entrypoint-initdb.d/
+exec gosu mongodb mongod --config /etc/mongod.conf
