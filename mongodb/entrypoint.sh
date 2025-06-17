@@ -23,6 +23,7 @@ fi
 # Shut down standalone MongoDB
 echo "Shutting down standalone MongoDB..."
 gosu mongodb mongod --shutdown
+sleep 5 # Wait for shutdown to complete
 
 # Start MongoDB in replica set mode for initialization
 echo "Starting MongoDB in replica set mode..."
@@ -41,6 +42,11 @@ if [ -f /docker-entrypoint-initdb.d/02-init-mongo.js ]; then
     fi
 fi
 
+# Shut down replica set MongoDB
+echo "Shutting down replica set MongoDB..."
+gosu mongodb mongod --shutdown
+sleep 5 # Wait for shutdown to complete
+
 # Bring MongoDB to foreground with replica set configuration
 echo "Starting MongoDB in foreground..."
-gosu mongodb mongod --config /etc/mongod.conf
+exec gosu mongodb mongod --config /etc/mongod.conf
