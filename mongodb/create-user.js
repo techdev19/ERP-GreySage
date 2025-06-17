@@ -1,5 +1,5 @@
 print("Creating admin user...");
-db = connect("mongodb://localhost:27017/admin?ssl=false");
+db = connect("mongodb://localhost:27017/admin?ssl=true");
 
 try {
     db.createUser({

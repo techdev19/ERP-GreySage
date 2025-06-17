@@ -6,7 +6,7 @@ sleep(15000); // Wait 15 seconds
 while (attempt <= maxAttempts) {
     try {
         print(`Attempt ${attempt}: Connecting to admin database...`);
-        db = connect(`mongodb://greysageadmin:tempPWD123@${mongoHost}:27017/admin?authSource=admin&ssl=false`);
+        db = connect(`mongodb://greysageadmin:tempPWD123@${mongoHost}:27017/admin?authSource=admin&ssl=true`);
         print("Connected to admin database");
         rs.initiate({
             _id: "rs0",
