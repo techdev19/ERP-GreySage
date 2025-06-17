@@ -5,7 +5,7 @@ ls -l /docker-entrypoint-initdb.d/
 
 # Start MongoDB in background
 gosu mongodb mongod --config /etc/mongod.conf --fork --logpath /tmp/mongod.log
-sleep 5 # Wait for MongoDB to start
+sleep 10 # Wait for MongoDB to start
 
 # Run initialization scripts with explicit ssl=false
 for f in /docker-entrypoint-initdb.d/*.js; do
