@@ -36,7 +36,8 @@ try {
 
 let maxAttempts = 10;
 let attempt = 1;
-let mongoHost = env("MONGO_HOST", "localhost"); // Set MONGO_HOST in Render.com
+let mongoHost = process.env.MONGO_HOST || "localhost";
+sleep(5000); // Wait 5 seconds to ensure server is ready
 while (attempt <= maxAttempts) {
     try {
         print("Attempting to initiate replica set...");
