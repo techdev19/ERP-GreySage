@@ -3,9 +3,18 @@ set -e
 echo "Running entrypoint.sh..."
 ls -l /docker-entrypoint-initdb.d/
 
-# Start MongoDB in standalone mode for user creation with TLS (no --fork)
+# Debug: Check certificate file
+echo "Checking mongodb.pem..."
+ls -l /etc/ssl/mongodb.pem
+if [ ! -f /etc/ssl/mongodb.pem ]; then
+    echo "Error: mongodb.pem not found!"
+    exit 1
+fi
+echo "mongodb.pem permissions and ownership: $(stat -c '%a %U:%G' /etc/ssl/mongodb.pem)"
+
+# Start MongoDB in standalone mode for user creation with TLS and verbose logging
 echo "Starting MongoDB in standalone mode with TLS..."
-gosu mongodb mongod --bind_ip_all --port 27017 --dbpath /data/db --tlsMode requireTLS --tlsCertificateKeyFile /etc/ssl/mongodb.pem --tlsCAFile /etc/ssl/mongodb.pem --logpath /tmp/mongod.log
+gosu mongodb mongod --bind_ip_all --port 27017 --dbpath /data/db --tlsMode requireTLS --tlsCertificateKeyFile /etc/ssl/mongodb.pem --tlsCAFile /etc/ssl/mongodb.pem --logpath /tmp/mongod.log --verbose
 sleep 15
 
 # Run create-user.js
@@ -25,9 +34,9 @@ echo "Shutting down standalone MongoDB..."
 gosu mongodb mongod --shutdown
 sleep 5
 
-# Start MongoDB in replica set mode with TLS (no --fork)
+# Start MongoDB in replica set mode with TLS and verbose logging
 echo "Starting MongoDB in replica set mode with TLS..."
-gosu mongodb mongod --config /etc/mongod.conf --logpath /tmp/mongod.log
+gosu mongodb mongod --config /etc/mongod.conf --logpath /tmp/mongod.log --verbose
 sleep 15
 
 # Run init-mongo.js
@@ -47,6 +56,6 @@ echo "Shutting down replica set MongoDB..."
 gosu mongodb mongod --shutdown
 sleep 5
 
-# Start MongoDB in foreground with TLS
+# Start MongoDB in foreground with TLS and verbose logging
 echo "Starting MongoDB in foreground with TLS..."
-exec gosu mongodb mongod --config /etc/mongod.conf
+exec gosu mongodb mongod --config /etc/mongod.conf --verbose
