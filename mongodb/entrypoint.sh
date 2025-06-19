@@ -3,9 +3,9 @@ set -e
 echo "Running entrypoint.sh..."
 ls -l /docker-entrypoint-initdb.d/
 
-# Start MongoDB in standalone mode for user creation with TLS
+# Start MongoDB in standalone mode for user creation with TLS (no --fork)
 echo "Starting MongoDB in standalone mode with TLS..."
-gosu mongodb mongod --bind_ip_all --port 27017 --dbpath /data/db --tlsMode requireTLS --tlsCertificateKeyFile /etc/ssl/mongodb.pem --tlsCAFile /etc/ssl/mongodb.pem --fork --logpath /tmp/mongod.log
+gosu mongodb mongod --bind_ip_all --port 27017 --dbpath /data/db --tlsMode requireTLS --tlsCertificateKeyFile /etc/ssl/mongodb.pem --tlsCAFile /etc/ssl/mongodb.pem --logpath /tmp/mongod.log
 sleep 15
 
 # Run create-user.js
@@ -25,9 +25,9 @@ echo "Shutting down standalone MongoDB..."
 gosu mongodb mongod --shutdown
 sleep 5
 
-# Start MongoDB in replica set mode with TLS
+# Start MongoDB in replica set mode with TLS (no --fork)
 echo "Starting MongoDB in replica set mode with TLS..."
-gosu mongodb mongod --config /etc/mongod.conf --fork --logpath /tmp/mongod.log
+gosu mongodb mongod --config /etc/mongod.conf --logpath /tmp/mongod.log
 sleep 15
 
 # Run init-mongo.js
