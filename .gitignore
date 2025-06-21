@@ -13,3 +13,4 @@ frontendv2
 
 .env
 *.zip
+.env.development

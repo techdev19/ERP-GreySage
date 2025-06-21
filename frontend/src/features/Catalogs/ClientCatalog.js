@@ -58,7 +58,7 @@ function ClientCatalog() {
     // }, {
     //   headers: { Authorization: `Bearer ${token}` }
     // })
-    apiService.client.createClient(...form)
+    apiService.client.createClient(form)
       .then(res => {
         setClients([...clients, res]);
         setForm({ name: '', clientCodePrefix: '', contact: '', email: '', address: '' });
