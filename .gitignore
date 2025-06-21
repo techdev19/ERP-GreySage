@@ -13,3 +13,4 @@ frontendv2
 
 .env
 *.zip
+mongo-standalone/render_logs.txt
