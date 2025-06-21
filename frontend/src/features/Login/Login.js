@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -22,6 +21,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
 import ThemeToggle from '../../components/Theme/ThemeToggle';
 import { Grid } from '@mui/material';
+import authService from '../../services/authService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -122,8 +122,7 @@ export default function Login({ variant, setVariant }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (validateInputs()) {
-      axios
-        .post('http://localhost:5000/api/login', form)
+      authService.login(form)
         .then((res) => {
           localStorage.setItem('token', res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));

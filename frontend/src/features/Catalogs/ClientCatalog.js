@@ -52,12 +52,6 @@ function ClientCatalog() {
   };
 
   const handleAddClient = () => {
-    // axios.post('http://localhost:5000/api/clients', {
-    //   ...form,
-    //   // clientCode: `${form.clientCodePrefix}-100` // Backend will handle increment
-    // }, {
-    //   headers: { Authorization: `Bearer ${token}` }
-    // })
     apiService.client.createClient(form)
       .then(res => {
         setClients([...clients, res]);

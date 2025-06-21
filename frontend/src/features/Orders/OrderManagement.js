@@ -139,33 +139,6 @@ function OrderManagement() {
         });
         setOpenModal(false);
       });
-
-    // axios.post('http://localhost:5000/api/orders', form, {
-    //   headers: { Authorization: `Bearer ${token}` }
-    // })
-    //   .then(res => {
-    //     setOrders([...orders, res.data]);
-    //     setForm({
-    //       date: new Date().toISOString().split('T')[0],
-    //       clientId: '',
-    //       fabric: '',
-    //       fitStyleId: '',
-    //       waistSize: '',
-    //       totalQuantity: '',
-    //       threadColors: [{ color: '', quantity: '' }],
-    //       description: '',
-    //       attachments: []
-    //     });
-    //     setOpenModal(false);
-    //   })
-    //   .catch(err => {
-    //     if (err.response?.status === 401) {
-    //       alert('Session expired. Please log in again.');
-    //       window.location.href = '/login';
-    //     } else {
-    //       alert(err.response?.data?.error || 'An error occurred');
-    //     }
-    //   });
   };
 
   const handleUpdateStatus = (id, newStatus) => {

@@ -9,6 +9,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { MorphDateTextField } from '../../components/MuiCustom';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function WashingManagement() {
   const { orderId } = useParams();
@@ -35,16 +36,16 @@ function WashingManagement() {
 
   const fetchData = async () => {
     try {
-      const [washingRes, orderRes, vendorsRes, stitchingRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/washing?orderId=${orderId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`http://localhost:5000/api/orders/${orderId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/washing-vendors', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`http://localhost:5000/api/stitching?orderId=${orderId}`, { headers: { Authorization: `Bearer ${token}` } })
+      const [washingRes, orderRes, washingVendorsRes, stitchingRes] = await Promise.all([
+        apiService.washing.getWashing('', orderId, ''),
+        apiService.orders.getOrderById(orderId),
+        apiService.washingVendors.getWashingVendors(),
+        apiService.stitching.getStitching('', orderId, ''),
       ]);
-      setWashingRecords(washingRes.data);
-      setOrder(orderRes.data);
-      setVendors(vendorsRes.data);
-      setStitchingRecords(stitchingRes.data);
+      setWashingRecords(washingRes);
+      setOrder(orderRes);
+      setVendors(washingVendorsRes);
+      setStitchingRecords(stitchingRes);
     } catch (err) {
       if (err.response?.status === 401) {
         alert('Session expired. Please log in again.');
