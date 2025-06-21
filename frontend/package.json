@@ -1,6 +1,7 @@
 {
-    "name": "erp-greysage",
+    "name": "greysage",
     "version": "1.0.0",
+    "author": "Adil Khan",
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build"
