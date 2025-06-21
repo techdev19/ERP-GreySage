@@ -1,5 +1,5 @@
 {
-  "name": "erp-greysage-backend",
+  "name": "greysageapi",
   "version": "1.0.0",
   "scripts": {
     "start": "node server.js"
@@ -14,7 +14,7 @@
   },
   "main": "mongodb_schema.js",
   "keywords": [],
-  "author": "",
+  "author": "Adil Khan",
   "license": "ISC",
   "description": ""
 }
