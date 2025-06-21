@@ -124,11 +124,11 @@ export default function Login({ variant, setVariant }) {
     if (validateInputs()) {
       authService.login(form)
         .then((res) => {
-          localStorage.setItem('token', res.data.token);
-          localStorage.setItem('user', JSON.stringify(res.data.user));
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
           navigate('/dashboard');
         })
-        .catch((err) => alert(err.response?.data?.error || 'Login failed'));
+        .catch((err) => alert(err.response?.error || 'Login failed'));
     }
   };
 
