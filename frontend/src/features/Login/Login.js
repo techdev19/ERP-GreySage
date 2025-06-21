@@ -55,6 +55,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 
 export default function Login({ variant, setVariant }) {
   const theme = useTheme();
+  const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -82,9 +83,9 @@ export default function Login({ variant, setVariant }) {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  function handleClick() {
+    setLoading(true);
+  }
 
   const handleClose = () => {
     setOpen(false);
@@ -122,13 +123,14 @@ export default function Login({ variant, setVariant }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (validateInputs()) {
+      handleClick();
       authService.login(form)
         .then((res) => {
           localStorage.setItem('token', res.token);
           localStorage.setItem('user', JSON.stringify(res.user));
           navigate('/dashboard');
         })
-        .catch((err) => alert(err.response?.error || 'Login failed'));
+        .catch((err) => { alert(err.response?.error || 'Login failed'); setLoading(false) });
     }
   };
 
@@ -153,8 +155,8 @@ export default function Login({ variant, setVariant }) {
               labelId="theme-variant-label"
               value={variant}
               onChange={handleVariantChange}
-              // label="Theme"
-              // sx={{ width: 90 }}
+            // label="Theme"
+            // sx={{ width: 90 }}
             >
               <MenuItem value="purple">Purple</MenuItem>
               <MenuItem value="earthy">Earthy</MenuItem>
@@ -206,17 +208,17 @@ export default function Login({ variant, setVariant }) {
                 fullWidth
                 variant="outlined"
                 color={emailError ? 'error' : 'primary'}
-                // sx={{
-                //   '& .MuiInputBase-input': {
-                //     color: theme.palette.text.primary,
-                //   },
-                //   '& .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.divider,
-                //   },
-                //   '&:hover .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.text.secondary,
-                //   },
-                // }}
+              // sx={{
+              //   '& .MuiInputBase-input': {
+              //     color: theme.palette.text.primary,
+              //   },
+              //   '& .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.divider,
+              //   },
+              //   '&:hover .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.text.secondary,
+              //   },
+              // }}
               />
             </FormControl>
             <FormControl>
@@ -237,17 +239,17 @@ export default function Login({ variant, setVariant }) {
                 fullWidth
                 variant="outlined"
                 color={passwordError ? 'error' : 'primary'}
-                // sx={{
-                //   '& .MuiInputBase-input': {
-                //     color: theme.palette.text.primary,
-                //   },
-                //   '& .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.divider,
-                //   },
-                //   '&:hover .MuiOutlinedInput-notchedOutline': {
-                //     borderColor: theme.palette.text.secondary,
-                //   },
-                // }}
+              // sx={{
+              //   '& .MuiInputBase-input': {
+              //     color: theme.palette.text.primary,
+              //   },
+              //   '& .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.divider,
+              //   },
+              //   '&:hover .MuiOutlinedInput-notchedOutline': {
+              //     borderColor: theme.palette.text.secondary,
+              //   },
+              // }}
               />
             </FormControl>
             <FormControlLabel
@@ -256,29 +258,29 @@ export default function Login({ variant, setVariant }) {
               sx={{ color: theme.palette.text.primary }}
             />
             <ForgotPassword open={open} handleClose={handleClose} />
-            <Button type="submit" fullWidth variant="contained" size='medium'>
+            <Button type="submit" fullWidth variant="contained" size='medium' loading={loading} loadingPosition="end">
               Sign in
             </Button>
-            
+
           </Box>
           <Grid container spacing={2}>
-            <Grid item size={{xs: 12, sm: 6}}>
-            <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'start', md: 'start'}}>
-              {/* Don't have an account?{' '} */}
-              <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
-                Register
-              </Link>
-            </Typography>
-            
-            </Grid>
-            <Grid item size={{xs: 12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
+              <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'start', md: 'start' }}>
+                {/* Don't have an account?{' '} */}
+                <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
+                  Register
+                </Link>
+              </Typography>
 
-            <Typography sx={{color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'end', md: 'end'}}>
-              {/* Don't have an account?{' '} */}
-              <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
-              Forgot your password?
-              </Link>
-            </Typography>
+            </Grid>
+            <Grid item size={{ xs: 12, sm: 6 }}>
+
+              <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'end', md: 'end' }}>
+                {/* Don't have an account?{' '} */}
+                <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
+                  Forgot your password?
+                </Link>
+              </Typography>
             </Grid>
           </Grid>
           {/* <Divider sx={{ my: 0, color: theme.palette.text.secondary }}>or</Divider>

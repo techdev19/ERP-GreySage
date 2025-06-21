@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Link, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
 import { Close as CloseIcon, AttachFile as AttachFileIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/TableSkeletonLoader';
 import apiService from '../../services/apiService';
 
 function OrderManagement() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState();
   const [clients, setClients] = useState([]);
   const [fitStyles, setFitStyles] = useState([]);
   const [form, setForm] = useState({
@@ -42,7 +43,7 @@ function OrderManagement() {
         apiService.client.getClients(),
         apiService.fitStyles.getFitstyles()
       ]);
-      setOrders(ordersRes);
+      setTimeout(() => setOrders(ordersRes), process.env.REACT_APP_DATA_LOAD_TIMEOUT);
       setClients(clientsRes);
       setFitStyles(fitStylesRes);
     } catch (err) {
@@ -142,7 +143,7 @@ function OrderManagement() {
   };
 
   const handleUpdateStatus = (id, newStatus) => {
-      apiService.orders.updateOrderStatus(id, newStatus)
+    apiService.orders.updateOrderStatus(id, newStatus)
       .then(res => {
         fetchData();
       })
@@ -223,7 +224,7 @@ function OrderManagement() {
       cell: ({ row }) => (
         <FormControl variant="outlined" size="small" fullWidth>
           <Select
-            
+
             value={row.original.status}
             onChange={(e) => handleUpdateStatus(row.original._id, e.target.value)}
           >
@@ -306,15 +307,18 @@ function OrderManagement() {
               ))}
             </TableHead>
             <TableBody>
-              {table.getRowModel().rows.map(row => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {!orders ? (
+                <TableRowsLoader colsNum={9} rowsNum={10} />
+              ) : (orders && orders.length > 0 ? (
+                table.getRowModel().rows.map(row => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))) : <NoRecordRow />)}
             </TableBody>
           </Table>
         </TableContainer>

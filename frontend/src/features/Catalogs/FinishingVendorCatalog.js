@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box, Modal, IconButton, Paper } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
+import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/TableSkeletonLoader';
 import apiService from '../../services/apiService';
 
 function FinishingVendorCatalog() {
-  const [vendors, setVendors] = useState([]);
+  const [vendors, setVendors] = useState();
   const [form, setForm] = useState({ name: '', contact: '', address: '' });
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
@@ -13,7 +14,7 @@ function FinishingVendorCatalog() {
 
   const getFinishingVendors = () => {
     apiService.finishingVendors.getFinishingVendors(search)
-      .then(res => setVendors(res))
+      .then(res => {setTimeout(() => setVendors(res), process.env.REACT_APP_DATA_LOAD_TIMEOUT)})
       .catch(err => {
         if (err.response?.status === 401) {
           alert('Session expired. Please log in again.');
@@ -154,15 +155,18 @@ function FinishingVendorCatalog() {
               ))}
             </TableHead>
             <TableBody>
-              {table.getRowModel().rows.map(row => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {!vendors ? (
+                <TableRowsLoader colsNum={5} rowsNum={10} />
+              ) : (vendors && vendors.length > 0 ? (
+                table.getRowModel().rows.map(row => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))) : <NoRecordRow />)}
             </TableBody>
           </Table>
         </TableContainer>

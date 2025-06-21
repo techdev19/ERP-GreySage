@@ -7,6 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { MorphDateTextField } from '../../components/MuiCustom';
 import WashingTable from '../Washing/WashingTable';
+import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/TableSkeletonLoader';
 
 function StitchingTable({
   stitchingRecords,
@@ -172,28 +173,31 @@ function StitchingTable({
           ))}
         </TableHead>
         <TableBody>
-          {table.getRowModel().rows.map(row => (
-            <React.Fragment key={row.id}>
-              <TableRow>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {expandedRows[row.original._id] && (
+          {!stitchingRecords ? (
+            <TableRowsLoader colsNum={9} rowsNum={10} />
+          ) : (stitchingRecords && stitchingRecords.length > 0 ? (
+            table.getRowModel().rows.map(row => (
+              <React.Fragment key={row.id}>
                 <TableRow>
-                  <TableCell colSpan={9}>
-                    <WashingTable
-                      washingRecords={washingRecords[row.original.lotId?._id] || []}
-                      lotId={row.original.lotId?._id}
-                      handleUpdateWashOut={handleUpdateWashOut}
-                    />
-                  </TableCell>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </React.Fragment>
-          ))}
+                {expandedRows[row.original._id] && (
+                  <TableRow>
+                    <TableCell colSpan={9}>
+                      <WashingTable
+                        washingRecords={washingRecords[row.original.lotId?._id] || []}
+                        lotId={row.original.lotId?._id}
+                        handleUpdateWashOut={handleUpdateWashOut}
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            ))) : <NoRecordRow />)}
         </TableBody>
       </Table>
     </TableContainer>

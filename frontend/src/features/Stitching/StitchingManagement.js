@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Paper, Typography, Box, Button, TextField } from '@mui/material';
+import { Container, Paper, Typography, Box, Button, TextField, Skeleton } from '@mui/material';
 import apiService from '../../services/apiService';
 import StitchingTable from './StitchingTable';
 import AddStitchingModal from './AddStitchingModal';
@@ -8,7 +8,7 @@ import AddWashingModal from '../Washing/AddWashingModal';
 
 function StitchingManagement() {
   const { orderId } = useParams();
-  const [stitchingRecords, setStitchingRecords] = useState([]);
+  const [stitchingRecords, setStitchingRecords] = useState();
   const [washingRecords, setWashingRecords] = useState({});
   const [order, setOrder] = useState(null);
   const [stitchingVendors, setStitchingVendors] = useState([]);
@@ -28,8 +28,8 @@ function StitchingManagement() {
         apiService.stitchingVendors.getStitchingVendors(),
         apiService.washingVendors.getWashingVendors()
       ]);
-      setStitchingRecords(stitchingRes);
-      setOrder(orderRes);
+      setTimeout(() => setStitchingRecords(stitchingRes), process.env.REACT_APP_DATA_LOAD_TIMEOUT);
+      setTimeout(() => setOrder(orderRes), process.env.REACT_APP_DATA_LOAD_TIMEOUT);
       setStitchingVendors(stitchingVendorsRes);
       setWashingVendors(washingVendorsRes);
       const total = stitchingRes.reduce((sum, record) => sum + record.quantity, 0);
@@ -39,7 +39,7 @@ function StitchingManagement() {
         alert('Session expired. Please log in again.');
         window.location.href = '/login';
       } else {
-        alert(err.response?.data?.error || 'An error occurred');
+        alert(err.response?.error || 'An error occurred');
       }
     }
   };
@@ -53,7 +53,7 @@ function StitchingManagement() {
       const washingRes = await apiService.washing.getWashing('', lotId, '');
       setWashingRecords(prev => ({ ...prev, [lotId]: washingRes }));
     } catch (err) {
-      alert(err.response?.data?.error || 'An error occurred while fetching washing records');
+      alert(err.response?.error || 'An error occurred while fetching washing records');
     }
   };
 
@@ -65,7 +65,7 @@ function StitchingManagement() {
   const handleUpdateStitchOut = (id, stitchOutDate) => {
     apiService.stitching.updateStitching(id, stitchOutDate)
       .then(res => {
-        setStitchingRecords(stitchingRecords.map(record => record._id === id ? res.data : record));
+        setStitchingRecords(stitchingRecords.map(record => record._id === id ? res : record));
       });
   };
 
@@ -81,7 +81,7 @@ function StitchingManagement() {
       .then(res => {
         setWashingRecords(prev => ({
           ...prev,
-          [lotId]: prev[lotId].map(record => record._id === id ? res.data : record)
+          [lotId]: prev[lotId].map(record => record._id === id ? res : record)
         }));
       });
   };
@@ -90,7 +90,7 @@ function StitchingManagement() {
     <Container sx={{ mt: 4 }}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Stitching Management</Typography>
-        {order && (
+        {!order ? (<Skeleton animation="wave" variant="text" sx={{marginBottom: 2, width: '60%'}} />) : (
           <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
             <Typography>Order ID: <b>{order.orderId}</b></Typography>
             <Typography>Total Quantity: <b>{order.totalQuantity}</b></Typography>

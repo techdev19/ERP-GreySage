@@ -90,6 +90,7 @@ function Navbar({ variant, setVariant }) {
                 justifyContent: collapsed ? 'center' : 'flex-start',
                 px: collapsed ? 1 : 2,
               }}
+              disabled={item.path === '/invoices'}
             >
               <ListItemIcon
                 sx={{
