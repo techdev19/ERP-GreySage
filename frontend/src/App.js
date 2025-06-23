@@ -23,7 +23,7 @@ import WashingVendorCatalog from './features/Catalogs/WashingVendorCatalog';
 import FinishingVendorCatalog from './features/Catalogs/FinishingVendorCatalog';
 import OrderManagement from './features/Orders/OrderManagement';
 import StitchingManagement from './features/Stitching/StitchingManagement';
-import WashingManagement from './features/Washing/WashingManagement';
+// import WashingManagement from './features/Washing/WashingManagement';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem('token');
@@ -78,7 +78,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/orders" element={<OrderManagement />} />
             <Route path="/stitching/:orderId" element={<StitchingManagement />} />
-            <Route path="/washing/:orderId" element={<WashingManagement />} />
+            {/* <Route path="/washing/:orderId" element={<WashingManagement />} /> */}
             <Route path="/invoices" element={<InvoiceManagement />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/clients" element={<ClientCatalog />} />

@@ -1,6 +1,56 @@
 import axiosInstance from './axiosInstance';
 
 const apiService = {
+
+  admin: {
+    userMgmt: {
+      getUsers: async () => {
+        try {
+          const response = await axiosInstance.get('api/users');
+          return response.data;
+        } catch (error) {
+          throw error.response?.data || error.message;
+        }
+      },
+      deleteUser: async (id) => {
+        try {
+          const response = await axiosInstance.put(`api/users/${id}`);
+          return response.data;
+        } catch (error) {
+          throw error.response?.data || error.message;
+        }
+      }
+    },
+    audit: {
+      getAudits: async () => {
+        try {
+          const response = await axiosInstance.get('api/audit-logs');
+          return response.data;
+        } catch (error) {
+          throw error.response?.data || error.message;
+        }
+      },
+    },
+    report: {
+      getReport: async () => {
+         try {
+          const response = await axiosInstance.get('api/reports');
+          return response.data;
+        } catch (error) {
+          throw error.response?.data || error.message;
+        }
+      },
+      generateReport: async (repData) => {
+         try {
+          const response = await axiosInstance.post('api/reports', repData);
+          return response.data;
+        } catch (error) {
+          throw error.response?.data || error.message;
+        }
+      }
+    }
+  },
+
   // Order-related API calls
   orders: {
     createOrder: async (orderData) => {
@@ -336,7 +386,7 @@ const apiService = {
       try {
         const response = await axiosInstance.get('api/fitstyles', {
           params: { search },
-        }); 
+        });
         return response.data;
       } catch (error) {
         throw error.response?.data || error.message;

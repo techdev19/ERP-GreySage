@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableRow, Button, TextField, Container, Typography } from '@mui/material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/users', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => setUsers(res.data))
-      .catch(err => alert(err.response.data.error));
+    apiService.admin.userMgmt.getUsers()
+      .then(res => setUsers(res));
   }, []);
 
   const columns = [
@@ -44,11 +41,8 @@ function UserManagement() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   const handleDelete = (id) => {
-    axios.delete(`http://localhost:5000/api/users/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(() => setUsers(users.filter(u => u._id !== id)))
-      .catch(err => alert(err.response.data.error));
+    apiService.admin.userMgmt.deleteUser(id)
+      .then(() => setUsers(users.filter(u => u._id !== id)));
   };
 
   return (

@@ -1,33 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableRow, Button, TextField, Container, Typography } from '@mui/material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 
 function AuditLogs() {
   const [logs, setLogs] = useState([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/audit-logs', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => setLogs(res.data))
-      .catch(err => alert(err.response.data.error));
+    apiService.admin.audit.getAudits()
+      .then(res => setLogs(res));
   }, []);
 
   const columns = [
     { accessorKey: 'action', header: 'Action' },
     { accessorKey: 'user', header: 'User' },
     { accessorKey: 'timestamp', header: 'Timestamp' },
-    {
-      accessorKey: '_id',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <Button variant="contained" color="error" onClick={() => handleDelete(row.original._id)}>
-          Delete
-        </Button>
-      )
-    }
+    // {
+    //   accessorKey: '_id',
+    //   header: 'Actions',
+    //   cell: ({ row }) => (
+    //     <Button variant="contained" color="error" onClick={() => handleDelete(row.original._id)}>
+    //       Delete
+    //     </Button>
+    //   )
+    // }
   ];
 
   const table = useReactTable({
@@ -41,15 +38,7 @@ function AuditLogs() {
   });
 
   const getHeaderContent = (column) => column.columnDef && column.columnDef.header ? column.columnDef.header.toUpperCase() : column.id;
-  const isColumnSortable = (column) => column.columnDef && column.colu
-
-  const handleDelete = (id) => {
-    axios.delete(`http://localhost:5000/api/audit-logs/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(() => setLogs(logs.filter(l => l._id !== id)))
-      .catch(err => alert(err.response.data.error));
-  };
+  const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
     <Container sx={{ mt: 4 }}>

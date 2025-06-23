@@ -12,9 +12,6 @@ function StitchingVendorCatalog() {
   const token = localStorage.getItem('token');
 
   const getStitchingVendors = () => {
-    // axios.get(`http://localhost:5000/api/stitching-vendors?search=${search}`, {
-    //   headers: { Authorization: `Bearer ${token}` }
-    // })
     apiService.stitchingVendors.getStitchingVendors(search)
       .then(res => setVendors(res))
       .catch(err => {

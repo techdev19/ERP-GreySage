@@ -61,7 +61,7 @@ const createWashing = async (req, res) => {
       await order.save();
     }
 
-    await updateVendorBalance(vendorId, 'washing', lot._id, orderId, totalWashQuantity, rate);
+    // await updateVendorBalance(vendorId, 'washing', lot._id, orderId, totalWashQuantity, rate);
     // await logAction(req.user.userId, 'create_washing', 'Washing', washing._id, `Lot with invoice ${parsedInvoiceNumber} washed`);
 
     res.status(201).json(washing);

@@ -15,11 +15,10 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
     invoiceNumber: '',
     vendorId: '',
     quantityShort: '',
-    rate: '',
     date: dayjs(new Date()),
     washOutDate: null,
     description: '',
-    washDetails: [{ washColor: '', washCreation: '', quantity: '' }]
+    washDetails: [{ washColor: '', washCreation: '', quantity: '', rate: 0 }]
   });
 
   // Synchronize lotNumber and invoiceNumber props with form state
@@ -30,6 +29,23 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
       invoiceNumber: invoiceNumber || ''
     }));
   }, [lotNumber, invoiceNumber]);
+
+  const handleNumFieldKeyPress = (event) => {
+    const { key, ctrlKey, metaKey } = event;
+    if ((ctrlKey || metaKey) && ['a', 'c', 'x'].includes(key.toLowerCase())) {
+      return;
+    }
+    if (
+      !/[0-9]/.test(key) &&
+      key !== 'Backspace' &&
+      key !== 'Delete' &&
+      key !== 'ArrowLeft' &&
+      key !== 'ArrowRight' &&
+      key !== 'Tab'
+    ) {
+      event.preventDefault();
+    }
+  };
 
   const handleWashingChange = (e) => {
     const { name, value } = e.target;
@@ -76,11 +92,10 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
           invoiceNumber: '',
           vendorId: '',
           quantityShort: '',
-          rate: '',
           date: dayjs(new Date()),
           washOutDate: null,
           description: '',
-          washDetails: [{ washColor: '', washCreation: '', quantity: '' }]
+          washDetails: [{ washColor: '', washCreation: '', quantity: '', rate: 0 }]
         });
         onClose();
       });
@@ -100,7 +115,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
           top: '50%',
           left: '58%',
           transform: 'translate(-50%, -50%)',
-          width: '65%',
+          width: '50%',
           bgcolor: 'background.paper',
           borderRadius: 2,
           boxShadow: 24,
@@ -114,7 +129,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
           </IconButton>
         </Box>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 6 }}>
             <TextField
               name="lotNumber"
               label="Lot Number"
@@ -126,7 +141,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
               disabled
             />
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 6 }}>
             <TextField
               name="invoiceNumber"
               label="Invoice Number"
@@ -138,7 +153,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
               disabled
             />
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 6 }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>Vendor</InputLabel>
               <Select
@@ -153,31 +168,19 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 6 }}>
             <TextField
               name="quantityShort"
               label="Quantity Short"
-              type="number"
               value={washingForm.quantityShort}
               onChange={handleWashingChange}
+              onKeyDown={handleNumFieldKeyPress}
               fullWidth
               margin="normal"
               variant="outlined"
             />
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
-            <TextField
-              name="rate"
-              label="Rate"
-              type="number"
-              value={washingForm.rate}
-              onChange={handleWashingChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-          </Grid>
-          <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
+          <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 name="date"
@@ -190,7 +193,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
               />
             </LocalizationProvider>
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }} sx={{ alignContent: 'center' }}>
+          <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 name="washOutDate"
@@ -205,7 +208,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
           </Grid>
           {washingForm.washDetails.map((wd, index) => (
             <Grid container spacing={2} key={index} sx={{ alignItems: 'center' }}>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 2 }}>
                 <TextField
                   label="Wash Color"
                   value={wd.washColor}
@@ -215,7 +218,7 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 4 }}>
                 <TextField
                   label="Wash Creation"
                   value={wd.washCreation}
@@ -225,18 +228,29 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 2 }}>
                 <TextField
-                  label="Quantity"
-                  type="number"
-                  value={wd.quantity}
-                  onChange={(e) => handleWashDetailChange(index, 'quantity', e.target.value)}
+                  label="Rate"
+                  value={wd.rate}
+                  onChange={(e) => handleWashDetailChange(index, 'rate', e.target.value)}
+                  onKeyDown={handleNumFieldKeyPress}
                   fullWidth
                   margin="normal"
                   variant="outlined"
                 />
               </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
+              <Grid size={{ xs: 6, md: 2 }}>
+                <TextField
+                  label="Quantity"
+                  value={wd.quantity}
+                  onChange={(e) => handleWashDetailChange(index, 'quantity', e.target.value)}
+                  onKeyDown={handleNumFieldKeyPress}
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid size={{ xs: 1, md: 1 }}>
                 <IconButton onClick={() => removeWashDetail(index)} color="error">
                   <DeleteIcon />
                 </IconButton>

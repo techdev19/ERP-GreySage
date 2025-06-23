@@ -6,6 +6,7 @@ import StitchingTable from './StitchingTable';
 import AddStitchingModal from './AddStitchingModal';
 import AddWashingModal from '../Washing/AddWashingModal';
 
+// not being used as of now, might come handy later on
 function StitchingManagement() {
   const { orderId } = useParams();
   const [stitchingRecords, setStitchingRecords] = useState();

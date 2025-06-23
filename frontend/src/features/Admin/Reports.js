@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Container, Typography, Box } from '@mui/material';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 import * as XLSX from 'xlsx';
 
 function Reports() {
@@ -8,24 +8,18 @@ function Reports() {
   const [form, setForm] = useState({ period: 'January 2025' });
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/reports', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => setReports(res.data))
-      .catch(err => alert(err.response.data.error));
+    apiService.admin.report.getReport()
+      .then(res => setReports(res));
   }, []);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleGenerateReport = () => {
-    axios.post('http://localhost:5000/api/reports', form, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    apiService.admin.report.generateReport(form)
       .then(res => {
-        setReports([...reports, res.data]);
+        setReports(res);
         setForm({ period: 'January 2025' });
-      })
-      .catch(err => alert(err.response.data.error));
+      });
   };
 
   const handleExport = (report) => {
@@ -79,15 +73,15 @@ function Reports() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Design</TableCell>
+                <TableCell>Name</TableCell>
                 <TableCell>Pieces</TableCell>
                 <TableCell>Amount</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {r.topDesigns.map((d, i) => (
+              {r.topFitStyles.map((d, i) => (
                 <TableRow key={i}>
-                  <TableCell>{d.design}</TableCell>
+                  <TableCell>{d.name}</TableCell>
                   <TableCell>{d.pieces}</TableCell>
                   <TableCell>{d.amount}</TableCell>
                 </TableRow>
