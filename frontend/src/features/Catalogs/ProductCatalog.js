@@ -16,7 +16,7 @@ function ProductCatalog() {
     apiService.fitStyles.getFitstyles(search)
       .then(res => setProducts(res))
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -39,7 +39,7 @@ function ProductCatalog() {
         setOpenModal(false);
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -56,7 +56,7 @@ function ProductCatalog() {
         getFitStyles();
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {

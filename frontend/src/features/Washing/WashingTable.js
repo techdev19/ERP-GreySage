@@ -18,8 +18,6 @@ function WashingTable({ washingRecords, lotId, handleUpdateWashOut }) {
                 <TableCell>Date</TableCell>
                 <TableCell>Vendor</TableCell>
                 <TableCell>Wash Details</TableCell>
-                <TableCell>Qty Short</TableCell>
-                <TableCell>Rate</TableCell>
                 <TableCell>Wash Out Date</TableCell>
               </TableRow>
             </TableHead>
@@ -32,12 +30,10 @@ function WashingTable({ washingRecords, lotId, handleUpdateWashOut }) {
                   <TableCell>
                     {wr.washDetails.map((wd, index) => (
                       <Typography key={index}>
-                        Color: {wd.washColor}, Creation: {wd.washCreation}, Quantity: {wd.quantity}
+                        Color: {wd.washColor}, Creation: {wd.washCreation}, Quantity: {wd.quantity}, Qty Short: {wd.quantityShort}
                       </Typography>
                     ))}
                   </TableCell>
-                  <TableCell>{wr.quantityShort}</TableCell>
-                  <TableCell>{wr.rate}</TableCell>
                   <TableCell>
                     {wr.washOutDate ? (
                       new Date(wr.washOutDate).toLocaleDateString()

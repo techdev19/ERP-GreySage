@@ -16,7 +16,7 @@ function FinishingVendorCatalog() {
     apiService.finishingVendors.getFinishingVendors(search)
       .then(res => {setTimeout(() => setVendors(res), process.env.REACT_APP_DATA_LOAD_TIMEOUT)})
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -39,7 +39,7 @@ function FinishingVendorCatalog() {
         setOpenModal(false);
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -54,7 +54,7 @@ function FinishingVendorCatalog() {
         getFinishingVendors();
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {

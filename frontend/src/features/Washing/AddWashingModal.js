@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Box, Modal, Typography, IconButton, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon, Verified as VerifiedIcon } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -8,95 +9,44 @@ import { MorphDateTextField } from '../../components/MuiCustom';
 import dayjs from 'dayjs';
 import apiService from '../../services/apiService';
 
-function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumber, vendors, onAddWashing }) {
-  const [washingForm, setWashingForm] = useState({
+function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumber, vendors, onAddWashing, isEditMode = false }) {
+  const defaultValues = {
     orderId,
-    lotNumber: '',
-    invoiceNumber: '',
+    lotNumber: lotNumber || '',
+    invoiceNumber: invoiceNumber || '',
     vendorId: '',
-    quantityShort: '',
     date: dayjs(new Date()),
     washOutDate: null,
     description: '',
-    washDetails: [{ washColor: '', washCreation: '', quantity: '', rate: 0 }]
+    washDetails: [{ washColor: '', washCreation: '', quantity: '', rate: '', quantityShort: '' }],
+  };
+
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+    defaultValues,
+    mode: 'onChange',
   });
 
-  // Synchronize lotNumber and invoiceNumber props with form state
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'washDetails',
+  });
+
   useEffect(() => {
-    setWashingForm(prev => ({
-      ...prev,
-      lotNumber: lotNumber || '',
-      invoiceNumber: invoiceNumber || ''
-    }));
-  }, [lotNumber, invoiceNumber]);
+    setValue('lotNumber', lotNumber || '');
+    setValue('invoiceNumber', invoiceNumber || '');
+  }, [lotNumber, invoiceNumber, setValue]);
 
-  const handleNumFieldKeyPress = (event) => {
-    const { key, ctrlKey, metaKey } = event;
-    if ((ctrlKey || metaKey) && ['a', 'c', 'x'].includes(key.toLowerCase())) {
-      return;
-    }
-    if (
-      !/[0-9]/.test(key) &&
-      key !== 'Backspace' &&
-      key !== 'Delete' &&
-      key !== 'ArrowLeft' &&
-      key !== 'ArrowRight' &&
-      key !== 'Tab'
-    ) {
-      event.preventDefault();
-    }
-  };
+  const onSubmit = (data) => {
+    const formattedData = {
+      ...data,
+      date: data.date ? dayjs(data.date).toISOString() : null,
+      washOutDate: data.washOutDate ? dayjs(data.washOutDate).toISOString() : null,
+    };
 
-  const handleWashingChange = (e) => {
-    const { name, value } = e.target;
-    setWashingForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleWashingDateChange = (e, name) => {
-    setWashingForm(prev => ({ ...prev, [name]: dayjs(e) }));
-  };
-
-  const handleWashingSelectChange = (name, value) => {
-    setWashingForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleWashDetailChange = (index, field, value) => {
-    setWashingForm(prev => {
-      const newWashDetails = [...prev.washDetails];
-      newWashDetails[index] = { ...newWashDetails[index], [field]: value };
-      return { ...prev, washDetails: newWashDetails };
-    });
-  };
-
-  const addWashDetail = () => {
-    setWashingForm(prev => ({
-      ...prev,
-      washDetails: [...prev.washDetails, { washColor: '', washCreation: '', quantity: '' }]
-    }));
-  };
-
-  const removeWashDetail = (index) => {
-    setWashingForm(prev => ({
-      ...prev,
-      washDetails: prev.washDetails.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleSubmit = () => {
-    apiService.washing.createWashing(washingForm)
+    apiService.washing.createWashing(formattedData)
       .then(res => {
         onAddWashing(lotId, res.data);
-        setWashingForm({
-          orderId,
-          lotNumber: '',
-          invoiceNumber: '',
-          vendorId: '',
-          quantityShort: '',
-          date: dayjs(new Date()),
-          washOutDate: null,
-          description: '',
-          washDetails: [{ washColor: '', washCreation: '', quantity: '', rate: 0 }]
-        });
+        reset(defaultValues);
         onClose();
       });
   };
@@ -124,161 +74,273 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" id="add-washing-modal">Add Washing</Typography>
-          <IconButton onClick={onClose}>
+          <IconButton id="close-wash-modal" onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </Box>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 6, md: 6 }}>
-            <TextField
-              name="lotNumber"
-              label="Lot Number"
-              value={washingForm.lotNumber}
-              onChange={handleWashingChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              disabled
-            />
-          </Grid>
-          <Grid size={{ xs: 6, md: 6 }}>
-            <TextField
-              name="invoiceNumber"
-              label="Invoice Number"
-              value={washingForm.invoiceNumber}
-              onChange={handleWashingChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              disabled
-            />
-          </Grid>
-          <Grid size={{ xs: 6, md: 6 }}>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Vendor</InputLabel>
-              <Select
-                name="vendorId"
-                value={washingForm.vendorId}
-                onChange={(e) => handleWashingSelectChange('vendorId', e.target.value)}
-                label="Vendor"
-              >
-                {vendors.map(vendor => (
-                  <MenuItem key={vendor._id} value={vendor._id}>{vendor.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 6, md: 6 }}>
-            <TextField
-              name="quantityShort"
-              label="Quantity Short"
-              value={washingForm.quantityShort}
-              onChange={handleWashingChange}
-              onKeyDown={handleNumFieldKeyPress}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-          </Grid>
-          <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                name="date"
-                label="Date"
-                value={washingForm.date}
-                onChange={(e) => handleWashingDateChange(e, 'date')}
-                format='DD-MMM-YYYY'
-                slots={{ textField: MorphDateTextField }}
-                sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 6, md: 6 }}>
+              <Controller
+                name="lotNumber"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Lot Number"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    disabled
+                  />
+                )}
               />
-            </LocalizationProvider>
-          </Grid>
-          <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                name="washOutDate"
-                label="Wash Out Date"
-                value={washingForm.washOutDate}
-                onChange={(e) => handleWashingDateChange(e, 'washOutDate')}
-                format='DD-MMM-YYYY'
-                slots={{ textField: MorphDateTextField }}
-                sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
-              />
-            </LocalizationProvider>
-          </Grid>
-          {washingForm.washDetails.map((wd, index) => (
-            <Grid container spacing={2} key={index} sx={{ alignItems: 'center' }}>
-              <Grid size={{ xs: 6, md: 2 }}>
-                <TextField
-                  label="Wash Color"
-                  value={wd.washColor}
-                  onChange={(e) => handleWashDetailChange(index, 'washColor', e.target.value)}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <TextField
-                  label="Wash Creation"
-                  value={wd.washCreation}
-                  onChange={(e) => handleWashDetailChange(index, 'washCreation', e.target.value)}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 2 }}>
-                <TextField
-                  label="Rate"
-                  value={wd.rate}
-                  onChange={(e) => handleWashDetailChange(index, 'rate', e.target.value)}
-                  onKeyDown={handleNumFieldKeyPress}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 2 }}>
-                <TextField
-                  label="Quantity"
-                  value={wd.quantity}
-                  onChange={(e) => handleWashDetailChange(index, 'quantity', e.target.value)}
-                  onKeyDown={handleNumFieldKeyPress}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 1, md: 1 }}>
-                <IconButton onClick={() => removeWashDetail(index)} color="error">
-                  <DeleteIcon />
-                </IconButton>
-              </Grid>
             </Grid>
-          ))}
-          <Grid size={{ xs: 12 }}>
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={addWashDetail}>
-              Add Wash Detail
-            </Button>
+            <Grid size={{ xs: 6, md: 6 }}>
+              <Controller
+                name="invoiceNumber"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Invoice Number"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    disabled
+                  />
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 6, md: 6 }}>
+              <Controller
+                name="vendorId"
+                control={control}
+                rules={{ required: 'Required' }}
+                render={({ field }) => (
+                  <FormControl fullWidth margin="normal" error={!!errors.vendorId}>
+                    <InputLabel>Vendor</InputLabel>
+                    <Select
+                      {...field}
+                      label="Vendor"
+                    >
+                      {vendors.map(vendor => (
+                        <MenuItem key={vendor._id} value={vendor._id}>{vendor.name}</MenuItem>
+                      ))}
+                    </Select>
+                    {errors.vendorId && <Typography color="error" variant="caption">{errors.vendorId.message}</Typography>}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Controller
+                  name="date"
+                  control={control}
+                  rules={{ required: 'Required' }}
+                  render={({ field }) => (
+                    <DatePicker
+                      {...field}
+                      label="Date"
+                      format="DD-MMM-YYYY"
+                      slots={{ textField: MorphDateTextField }}
+                      sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+                      onChange={(value) => field.onChange(value)}
+                      slotProps={{
+                        textField: {
+                          error: !!errors.date,
+                          helperText: errors.date?.message,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+            </Grid>
+            {/* <Grid size={{ xs: 6, md: 6 }} sx={{ alignContent: 'center' }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Controller
+                  name="washOutDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      {...field}
+                      label="Wash Out Date"
+                      format="DD-MMM-YYYY"
+                      slots={{ textField: MorphDateTextField }}
+                      sx={{ width: '-webkit-fill-available', marginTop: '8px' }}
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+            </Grid> */}
+            {fields.map((wd, index) => (
+              <Grid container spacing={1} key={wd.id} sx={{ alignItems: 'flex-start', mt: 1 }}>
+                <Grid size={{ xs: 6, md: 2 }}>
+                  <Controller
+                    name={`washDetails[${index}].washColor`}
+                    control={control}
+                    rules={{ required: 'Required' }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Wash Color"
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        error={!!errors.washDetails?.[index]?.washColor}
+                        helperText={errors.washDetails?.[index]?.washColor?.message}
+                        sx={{ mb: 1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid size={{ xs: 6, md: 4 }}>
+                  <Controller
+                    name={`washDetails[${index}].washCreation`}
+                    control={control}
+                    rules={{ required: 'Required' }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Wash Creation"
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        error={!!errors.washDetails?.[index]?.washCreation}
+                        helperText={errors.washDetails?.[index]?.washCreation?.message}
+                        sx={{ mb: 1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid size={{ xs: 6, md: 2 }}>
+                  <Controller
+                    name={`washDetails[${index}].rate`}
+                    control={control}
+                    rules={{
+                      required: 'Required',
+                      pattern: {
+                        value: /^\d+(\.\d+)?$/,
+                        message: 'Only Number',
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Rate"
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        error={!!errors.washDetails?.[index]?.rate}
+                        helperText={errors.washDetails?.[index]?.rate?.message}
+                        sx={{ mb: 1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid size={{ xs: 6, md: 2 }}>
+                  <Controller
+                    name={`washDetails[${index}].quantity`}
+                    control={control}
+                    rules={{
+                      required: 'Required',
+                      pattern: {
+                        value: /^\d+$/,
+                        message: 'Only Number',
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Quantity"
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        error={!!errors.washDetails?.[index]?.quantity}
+                        helperText={errors.washDetails?.[index]?.quantity?.message}
+                        sx={{ mb: 1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+                {isEditMode && (
+                  <Grid size={{ xs: 6, md: 2 }}>
+                    <Controller
+                      name={`washDetails[${index}].quantityShort`}
+                      control={control}
+                      rules={{
+                        pattern: {
+                          value: /^\d+$/,
+                          message: 'Only Number',
+                        },
+                      }}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Quantity Short"
+                          fullWidth
+                          margin="normal"
+                          variant="outlined"
+                          error={!!errors.washDetails?.[index]?.quantityShort}
+                          helperText={errors.washDetails?.[index]?.quantityShort?.message}
+                          sx={{ mb: 1 }}
+                        />
+                      )}
+                    />
+                  </Grid>
+                )}
+                {fields.length > 1 && (<Grid size={{ xs: 6, md: 1 }} sx={{ textAlign: 'center' }}>
+                  {index !== 0 ? (<IconButton onClick={() => remove(index)} color="error" sx={{ mt: 2 }}>
+                    <DeleteIcon />
+                  </IconButton>) : <IconButton disabled sx={{ mt: 2 }}> <VerifiedIcon /></IconButton>}
+                </Grid>)}
+                {fields.length - 1 === index && (<Grid size={{ xs: 6, md: 1 }}>
+                  <IconButton
+                    // color="error"
+                    sx={{ mt: 2 }}
+                    onClick={() => append({ washColor: '', washCreation: '', quantity: '', rate: '', quantityShort: '' })}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Grid>)}
+              </Grid>
+            ))}
+            
+            {/* <Grid size={{ xs: 6, md: 6 }}>
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => append({ washColor: '', washCreation: '', quantity: '', rate: '', quantityShort: '' })}
+                sx={{ mt: 2 }}
+              >
+                Add Wash Detail
+              </Button>
+            </Grid> */}
+            <Grid item xs={12}>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Description"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    multiline
+                    rows={1}
+                  />
+                )}
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              name="description"
-              label="Description"
-              value={washingForm.description}
-              onChange={handleWashingChange}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              multiline
-              rows={1}
-            />
-          </Grid>
-        </Grid>
-        <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
-          SAVE
-        </Button>
+          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+            SAVE
+          </Button>
+        </form>
       </Box>
     </Modal>
   );

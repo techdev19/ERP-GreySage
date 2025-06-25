@@ -47,7 +47,7 @@ function WashingManagement() {
       setVendors(washingVendorsRes);
       setStitchingRecords(stitchingRes);
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
         alert('Session expired. Please log in again.');
         window.location.href = '/login';
       } else {
@@ -116,7 +116,7 @@ function WashingManagement() {
         setOpenModal(false);
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -133,7 +133,7 @@ function WashingManagement() {
         setWashingRecords(washingRecords.map(record => record._id === id ? res.data : record));
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {

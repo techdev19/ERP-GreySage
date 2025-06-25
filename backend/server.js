@@ -43,7 +43,7 @@ app.use(express.json());
 // MongoDB Connection
 //mongodb://adiladmin:caballer09@localhost:27017/sales_accounting?authSource=admin
 
-console.log(process.env.MONGO_URI)
+// console.log(process.env.MONGO_URI)
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true

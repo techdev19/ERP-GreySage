@@ -16,7 +16,7 @@ function ClientCatalog() {
     apiService.client.getClients(search)
       .then(res => setClients(res))
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -59,7 +59,7 @@ function ClientCatalog() {
         setOpenModal(false);
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -74,7 +74,7 @@ function ClientCatalog() {
         getClients();
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {

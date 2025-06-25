@@ -15,7 +15,7 @@ function WashingVendorCatalog() {
     apiService.washingVendors.getWashingVendors(search)
       .then(res => setVendors(res))
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -38,7 +38,7 @@ function WashingVendorCatalog() {
         setOpenModal(false);
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else {
@@ -53,7 +53,7 @@ function WashingVendorCatalog() {
         getWashingVendors();
       })
       .catch(err => {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           alert('Session expired. Please log in again.');
           window.location.href = '/login';
         } else if (err.response?.status === 404) {
