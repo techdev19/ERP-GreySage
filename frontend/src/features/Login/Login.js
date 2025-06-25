@@ -263,26 +263,22 @@ export default function Login({ variant, setVariant }) {
             </Button>
 
           </Box>
-          <Grid container spacing={2}>
+          {/*<Grid container spacing={2}>
             <Grid item size={{ xs: 12, sm: 6 }}>
               <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'start', md: 'start' }}>
-                {/* Don't have an account?{' '} */}
                 <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
                   Register
                 </Link>
               </Typography>
-
             </Grid>
             <Grid item size={{ xs: 12, sm: 6 }}>
-
               <Typography sx={{ color: theme.palette.text.primary }} textAlign={{ xs: 'center', sm: 'end', md: 'end' }}>
-                {/* Don't have an account?{' '} */}
                 <Link href="/register" variant="body2" sx={{ color: theme.palette.primary.main }}>
                   Forgot your password?
                 </Link>
               </Typography>
             </Grid>
-          </Grid>
+          </Grid>*/}
           {/* <Divider sx={{ my: 0, color: theme.palette.text.secondary }}>or</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography sx={{ textAlign: 'center', color: theme.palette.text.primary }}>

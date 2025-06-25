@@ -36,6 +36,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   // credentials: true // If your app uses cookies or auth headers
 }));
+app.options('*', cors()); // Explicitly handle OPTIONS requests
 
 app.use(express.json());
 

@@ -27,7 +27,7 @@
             ],
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env",
-            "program": "${workspaceFolder}\\backend\\server.js"
+            "program": "./backend/server.js"
         }
     ]
 }

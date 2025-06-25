@@ -131,10 +131,9 @@ const WashingSchema = new mongoose.Schema({
     washColor: { type: String, required: true },
     washCreation: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
-    rate: { type: Number, required: true, min: 0 }
+    rate: { type: Number, required: true, min: 0 },
+    quantityShort: { type: Number, default: 0, min: 0 }
   }],
-  quantityShort: { type: Number, default: 0, min: 0 },
-  
   description: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
