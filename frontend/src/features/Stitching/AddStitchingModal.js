@@ -80,6 +80,8 @@ function AddStitchingModal({ open, onClose, orderId, vendors, onAddStitching }) 
           left: '56%',
           transform: 'translate(-50%, -50%)',
           width: '50%',
+          maxHeight: '80vh',
+          overflowY: 'auto',
           bgcolor: 'background.paper',
           borderRadius: 2,
           boxShadow: 24,

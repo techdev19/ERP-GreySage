@@ -45,14 +45,14 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
 
   return (
     <ProtectedRoute>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: (theme) => theme.palette.background.default }}>
         <Navbar variant={variant} setVariant={setVariant} collapsed={collapsed} setCollapsed={setCollapsed} />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             p: 3,
-            width: `calc(100% - ${drawerWidth}px)`,
+            // width: `calc(100% - ${drawerWidth}px)`,
             transition: 'width 0.5s',
             backgroundColor: (theme) => theme.palette.background.default,
           }}

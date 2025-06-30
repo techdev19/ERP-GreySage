@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Box, Modal, Typography, IconButton, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon, Verified as VerifiedIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -10,6 +10,8 @@ import dayjs from 'dayjs';
 import apiService from '../../services/apiService';
 
 function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumber, vendors, onAddWashing, isEditMode = false }) {
+
+  const [loading, setLoading] = React.useState(false);
   const defaultValues = {
     orderId,
     lotNumber: lotNumber || '',
@@ -43,12 +45,15 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
       washOutDate: data.washOutDate ? dayjs(data.washOutDate).toISOString() : null,
     };
 
+    setLoading(true);
     apiService.washing.createWashing(formattedData)
       .then(res => {
+        setLoading(true);
         onAddWashing(lotId, res.data);
         reset(defaultValues);
         onClose();
-      });
+      })
+      .catch(errors => {alert(errors.response?.error || 'Failed'); setLoading(false)});
   };
 
   return (
@@ -66,6 +71,8 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
           left: '58%',
           transform: 'translate(-50%, -50%)',
           width: '50%',
+          maxHeight: '80vh',
+          overflowY: 'auto',
           bgcolor: 'background.paper',
           borderRadius: 2,
           boxShadow: 24,
@@ -292,34 +299,19 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
                     />
                   </Grid>
                 )}
-                {fields.length > 1 && (<Grid size={{ xs: 6, md: 1 }} sx={{ textAlign: 'center' }}>
-                  {index !== 0 ? (<IconButton onClick={() => remove(index)} color="error" sx={{ mt: 2 }}>
+                <Grid size={{ xs: 6, md: 2 }} sx={{ alignContent: 'center' }}>
+                  {index > 0 && <IconButton sx={{ mt: 2  }} onClick={() => remove(index)} color="error">
                     <DeleteIcon />
-                  </IconButton>) : <IconButton disabled sx={{ mt: 2 }}> <VerifiedIcon /></IconButton>}
-                </Grid>)}
-                {fields.length - 1 === index && (<Grid size={{ xs: 6, md: 1 }}>
-                  <IconButton
-                    // color="error"
-                    sx={{ mt: 2 }}
+                  </IconButton>}
+                  {index === fields.length - 1 && <IconButton sx={{ mt: 2 }}
                     onClick={() => append({ washColor: '', washCreation: '', quantity: '', rate: '', quantityShort: '' })}
                   >
                     <AddIcon />
-                  </IconButton>
-                </Grid>)}
+                  </IconButton>}
+                </Grid>
               </Grid>
             ))}
-            
-            {/* <Grid size={{ xs: 6, md: 6 }}>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => append({ washColor: '', washCreation: '', quantity: '', rate: '', quantityShort: '' })}
-                sx={{ mt: 2 }}
-              >
-                Add Wash Detail
-              </Button>
-            </Grid> */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12, md: 12 }}>
               <Controller
                 name="description"
                 control={control}
@@ -336,10 +328,22 @@ function AddWashingModal({ open, onClose, orderId, lotNumber, lotId, invoiceNumb
                 )}
               />
             </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Button
+                size='large'
+                type="submit"
+                fullWidth
+                endIcon={<SaveIcon />}
+                loading={loading}
+                loadingPosition="end"
+                variant="contained"
+                sx={{ mt: 2 }}
+              >
+                SAVE
+              </Button>
+            </Grid>
           </Grid>
-          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-            SAVE
-          </Button>
+          
         </form>
       </Box>
     </Modal>

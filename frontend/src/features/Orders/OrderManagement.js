@@ -265,7 +265,7 @@ function OrderManagement() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 4}}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Order Management</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -337,6 +337,8 @@ function OrderManagement() {
               left: '58%',
               transform: 'translate(-50%, -50%)',
               width: '50%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
               bgcolor: 'background.paper',
               borderRadius: 2,
               boxShadow: 24,
