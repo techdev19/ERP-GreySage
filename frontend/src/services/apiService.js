@@ -63,6 +63,15 @@ const apiService = {
       }
     },
 
+    updateOrder: async (id, orderData) => {
+      try {
+        const response = await axiosInstance.post(`api/orders-update/${id}`, orderData);
+        return response.data;
+      } catch (error) {
+        throw error
+      }
+    },
+
     getOrders: async (search = '') => {
       try {
         const response = await axiosInstance.get('api/orders', {

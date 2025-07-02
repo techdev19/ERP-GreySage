@@ -82,7 +82,7 @@ const OrderSchema = new mongoose.Schema({
   fitStyleId: { type: mongoose.Schema.Types.ObjectId, ref: 'FitStyle', required: true },
   waistSize: { type: String, required: true },
   totalQuantity: { type: Number, required: true, min: 1 },
-  actualTotalQuantity: { type: Number, default: 0 },
+  finalTotalQuantity: { type: Number, default: 0 },
   threadColors: [{
     color: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 }

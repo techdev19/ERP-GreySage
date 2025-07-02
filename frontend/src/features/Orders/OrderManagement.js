@@ -1,29 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
-import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Link, Container, Typography, Box, Modal, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Chip } from '@mui/material';
-import { Close as CloseIcon, AttachFile as AttachFileIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, Link, Container, Typography, Box, IconButton, Paper, Chip } from '@mui/material';
+import { Edit as EditIcon, CheckCircle, Cancel, HourglassEmpty, ShoppingCart, ContentCut, LocalLaundryService, AutoAwesome } from '@mui/icons-material';
 import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/TableSkeletonLoader';
 import apiService from '../../services/apiService';
+import AddOrderModal from './AddOrderModal';
 
 function OrderManagement() {
   const [orders, setOrders] = useState();
   const [clients, setClients] = useState([]);
   const [fitStyles, setFitStyles] = useState([]);
-  const [form, setForm] = useState({
-    date: new Date().toISOString().split('T')[0],
-    clientId: '',
-    fabric: '',
-    fitStyleId: '',
-    waistSize: '',
-    totalQuantity: '',
-    threadColors: [{ color: '', quantity: '' }],
-    description: '',
-    attachments: []
-  });
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
-  const [fileInput, setFileInput] = useState(null);
+  const [editOrder, setEditOrder] = useState(null);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
@@ -34,6 +24,15 @@ function OrderManagement() {
     4: 'Finishing',
     5: 'Complete',
     6: 'Cancelled'
+  };
+
+  const statusIcons = {
+    1: <ShoppingCart />,
+    2: <ContentCut />,
+    3: <LocalLaundryService />,
+    4: <AutoAwesome />,
+    5: <CheckCircle />,
+    6: <Cancel />
   };
 
   const fetchData = async () => {
@@ -60,93 +59,15 @@ function OrderManagement() {
     fetchData();
   }, [token]);
 
-  const handleChange = (e) => {
-    let { name, value } = e.target;
-    if (name === 'totalQuantity') { value = parseInt(value) }
-    setForm(prev => ({ ...prev, [name]: value }));
+  const onAddOrder = (newOrder) => {
+    setOrders([...orders, newOrder]);
+    setOpenModal(false);
   };
 
-  const handleSelectChange = (name, value) => {
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleThreadColorChange = (index, field, value) => {
-    if (field === 'quantity') value = parseInt(value);
-    setForm(prev => {
-      const newThreadColors = [...prev.threadColors];
-      newThreadColors[index] = { ...newThreadColors[index], [field]: value };
-      return { ...prev, threadColors: newThreadColors };
-    });
-  };
-
-  const addThreadColor = () => {
-    setForm(prev => ({
-      ...prev,
-      threadColors: [...prev.threadColors, { color: '', quantity: '' }]
-    }));
-  };
-
-  const removeThreadColor = (index) => {
-    setForm(prev => ({
-      ...prev,
-      threadColors: prev.threadColors.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const fileName = file.name;
-      const url = URL.createObjectURL(file);
-      setForm(prev => ({
-        ...prev,
-        attachments: [...prev.attachments, { fileName, url }]
-      }));
-    }
-  };
-
-  const handleDeleteAttachment = (index) => {
-    setForm(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAddOrder = () => {
-    const totalThreadQuantity = form.threadColors.reduce((sum, tc) => sum + Number(tc.quantity || 0), 0);
-    if (totalThreadQuantity !== Number(form.totalQuantity)) {
-      alert(`Sum of thread color quantities (${totalThreadQuantity}) must equal total quantity (${form.totalQuantity})`);
-      return;
-    }
-
-    if (isNaN(form.totalQuantity)) {
-      alert('Total Quantity is not a number');
-      return;
-    }
-
-    apiService.orders.createOrder(form)
-      .then(res => {
-        setOrders([...orders, res]);
-        setForm({
-          date: new Date().toISOString().split('T')[0],
-          clientId: '',
-          fabric: '',
-          fitStyleId: '',
-          waistSize: '',
-          totalQuantity: '',
-          threadColors: [{ color: '', quantity: '' }],
-          description: '',
-          attachments: []
-        });
-        setOpenModal(false);
-      });
-  };
-
-  const handleUpdateStatus = (id, newStatus) => {
-    apiService.orders.updateOrderStatus(id, newStatus)
-      .then(res => {
-        fetchData();
-      })
+  const onUpdateOrder = (updatedOrder) => {
+    setOrders(orders.map(o => o._id === updatedOrder._id ? updatedOrder : o));
+    setOpenModal(false);
+    setEditOrder(null);
   };
 
   const columns = [
@@ -190,7 +111,12 @@ function OrderManagement() {
     },
     {
       accessorKey: 'totalQuantity',
-      header: 'Total Qty',
+      header: 'Qty',
+      enableSorting: true
+    },
+    {
+      accessorKey: 'finalTotalQuantity',
+      header: 'Final Qty',
       enableSorting: true
     },
     {
@@ -206,54 +132,48 @@ function OrderManagement() {
         </Box>
       )
     },
-    // {
-    //   accessorKey: 'attachments',
-    //   header: 'Attachments',
-    //   cell: ({ row }) => (
-    //     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-    //       {row.original.attachments?.map((attachment, index) => (
-    //         <Chip key={index} label={attachment.fileName} />
-    //       ))}
-    //     </Box>
-    //   )
-    // },
     {
       accessorKey: 'status',
       header: 'Status',
       enableSorting: true,
-      cell: ({ row }) => (
-        <FormControl variant="outlined" size="small" fullWidth>
-          <Select
-
-            value={row.original.status}
-            onChange={(e) => handleUpdateStatus(row.original._id, e.target.value)}
-          >
-            {Object.entries(statusLabels).map(([value, label]) => (
-              <MenuItem key={value} value={parseInt(value)}>{label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )
+      cell: ({ row }) => {
+        const status = row.original.status;
+        const label = statusLabels[status] || 'Unknown';
+        const icon = statusIcons[status] || null;
+        return (
+          <Chip
+            icon={icon}
+            label={label}
+            color={
+              status === 1 ? 'primary' :
+              status === 2 ? 'primary' :
+              status === 3 ? 'primary' :
+              status === 4 ? 'primary' :
+              status === 5 ? 'primary' :
+              status === 6 ? 'secondary' : 'default'
+            }
+            sx={{ width: '100%' }}
+          />
+        );
+      }
     },
-    // {
-    //   accessorKey: 'actions',
-    //   header: 'Actions',
-    //   cell: ({ row }) => (
-    //     <Box>
-    //       <Button onClick={() => navigate(`/stitching/${row.original._id}`)} sx={{ mr: 1 }}>
-    //         Stitching
-    //       </Button>
-    //       <Button onClick={() => navigate(`/washing/${row.original._id}`)}>
-    //         Washing
-    //       </Button>
-    //     </Box>
-    //   )
-    // }
+    {
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <IconButton onClick={() => {
+          setEditOrder(row.original);
+          setOpenModal(true);
+        }}>
+          <EditIcon />
+        </IconButton>
+      )
+    }
   ];
 
   const table = useReactTable({
     columns,
-    data: orders,
+    data: orders || [], // Ensure data is not undefined
     state: { globalFilter: search },
     onGlobalFilterChange: setSearch,
     getCoreRowModel: getCoreRowModel(),
@@ -265,7 +185,7 @@ function OrderManagement() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
-    <Container sx={{ mt: 4}}>
+    <Container sx={{ mt: 4 }}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Order Management</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -277,7 +197,14 @@ function OrderManagement() {
             variant="standard"
             sx={{ maxWidth: '190px' }}
           />
-          <Button variant="contained" onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setEditOrder(null); // Clear editOrder for add mode
+              setOpenModal(true);
+            }}
+            sx={{ mt: 2 }}
+          >
             Add Order
           </Button>
         </Box>
@@ -308,7 +235,7 @@ function OrderManagement() {
             </TableHead>
             <TableBody>
               {!orders ? (
-                <TableRowsLoader colsNum={9} rowsNum={10} />
+                <TableRowsLoader colsNum={10} rowsNum={10} />
               ) : (orders && orders.length > 0 ? (
                 table.getRowModel().rows.map(row => (
                   <TableRow key={row.id}>
@@ -322,195 +249,18 @@ function OrderManagement() {
             </TableBody>
           </Table>
         </TableContainer>
-
-        <Modal
+        <AddOrderModal
           open={openModal}
-          onClose={() => setOpenModal(false)}
-          aria-labelledby="add-order-modal"
-          aria-describedby="modal-to-add-new-order"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '58%',
-              transform: 'translate(-50%, -50%)',
-              width: '50%',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" id="add-order-modal">Add Order</Typography>
-              <IconButton onClick={() => setOpenModal(false)}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <TextField
-                  name="date"
-                  label="Date"
-                  type="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Client</InputLabel>
-                  <Select
-                    name="clientId"
-                    value={form.clientId}
-                    onChange={(e) => handleSelectChange('clientId', e.target.value)}
-                    label="Client"
-                  >
-                    {clients.map(client => (
-                      <MenuItem key={client._id} value={client._id}>{client.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <TextField
-                  name="fabric"
-                  label="Fabric"
-                  value={form.fabric}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <FormControl margin="normal" variant="outlined" fullWidth>
-                  <InputLabel>Fit Style</InputLabel>
-                  <Select
-                    name="fitStyleId"
-                    value={form.fitStyleId}
-                    onChange={(e) => handleSelectChange('fitStyleId', e.target.value)}
-                    label="Fit Style"
-                  >
-                    {fitStyles.map(fitStyle => (
-                      <MenuItem key={fitStyle._id} value={fitStyle._id}>{fitStyle.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <TextField
-                  name="waistSize"
-                  label="Waist Size"
-                  value={form.waistSize}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, md: 4 }}>
-                <TextField
-                  name="totalQuantity"
-                  label="Total Quantity"
-                  type="number"
-                  value={form.totalQuantity}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              {form.threadColors.map((tc, index) => (
-                <>
-                  <Grid size={{ xs: 6, md: 4 }}>
-                    <TextField
-                      label="Thread Color"
-                      value={tc.color}
-                      onChange={(e) => handleThreadColorChange(index, 'color', e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, md: 4 }}>
-                    <TextField
-                      label="Quantity"
-                      type="number"
-                      value={tc.quantity}
-                      onChange={(e) => handleThreadColorChange(index, 'quantity', parseInt(e.target.value))}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid spacing={1} size={{ xs: 6, md: 4 }} sx={{ alignContent: 'center' }}>
-                    {index > 0 && <IconButton sx={{ verticalAlign: 'middle' }} onClick={() => removeThreadColor(index)} color="error">
-                      <DeleteIcon />
-                    </IconButton>}
-                    {index === form.threadColors.length - 1 && <IconButton sx={{ verticalAlign: 'middle' }} onClick={addThreadColor}>
-                      <AddIcon />
-                    </IconButton>}
-                  </Grid>
-                </>
-              ))}
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  name="description"
-                  label="Description"
-                  value={form.description}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  multiline
-                  rows={1}
-                />
-              </Grid>
-              {form.attachments.length > 0 && <Grid size={{ xs: 12, md: 12 }} sx={{ border: '1px solid #4741f6', borderRadius: '8px' }}>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxHeight: 120, m: 1, maxHeight: 80, overflowY: 'auto' }}>
-                  {form.attachments.map((attachment, index) => (
-                    <Chip
-                      key={index}
-                      label={attachment.fileName}
-                      onDelete={() => handleDeleteAttachment(index)}
-                      deleteIcon={<DeleteIcon />}
-                    />
-                  ))}
-                </Box>
-              </Grid>}
-              <Grid size={{ xs: 12, md: 4 }} sx={{ alignContent: 'center' }} fullWidth>
-                <Button
-                  variant="contained"
-                  component="label"
-                  fullWidth
-                  startIcon={<AttachFileIcon />}
-                >
-                  Upload Attachment
-                  <input
-                    type="file"
-                    hidden
-                    onChange={handleFileChange}
-                    ref={(input) => setFileInput(input)}
-                  />
-                </Button>
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }} fullWidth>
-                <Button variant="contained" fullWidth onClick={handleAddOrder}>
-                  SAVE
-                </Button>
-              </Grid>
-
-            </Grid>
-          </Box>
-        </Modal>
+          onClose={() => {
+            setOpenModal(false);
+            setEditOrder(null);
+          }}
+          clients={clients}
+          fitStyles={fitStyles}
+          onAddOrder={onAddOrder}
+          onUpdateOrder={onUpdateOrder}
+          order={editOrder}
+        />
       </Paper>
     </Container>
   );
