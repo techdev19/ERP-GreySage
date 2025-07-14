@@ -109,8 +109,8 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
 
   return (
     <ProtectedRoute>
-      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
-        {/* Navbar as a permanent sidebar or overlay */}
+      <Box sx={{ display: 'flex', minHeight: '100vh', height: '100vh', backgroundColor: theme.palette.background.default, overflow: 'hidden' }}>
+        {/* Navbar as a fixed sidebar */}
         <Box
           className="navbar" // Add class for click detection
           sx={{
@@ -120,10 +120,13 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-            position: isMobile ? 'fixed' : 'static', // Fixed on mobile, static on desktop
-            height: '100vh',
-            zIndex: isMobile ? theme.zIndex.drawer : 'auto', // Overlay on mobile
-            boxShadow: isMobile ? '2px 0 5px rgba(0,0,0,0.2)' : 'none', // Optional shadow on mobile
+            position: 'fixed', // Fixed position for both mobile and desktop
+            top: 0,
+            bottom: 0,
+            height: '100vh', // Full viewport height
+            zIndex: theme.zIndex.drawer,
+            boxShadow: '2px 0 5px rgba(0,0,0,0.2)', // Optional shadow
+            overflowX: 'hidden', // Prevent horizontal scrollbar
           }}
         >
           <Navbar
@@ -135,18 +138,16 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
           />
         </Box>
 
-        {/* Main Content */}
+        {/* Main Content with independent scrolling */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             p: 3,
-            width: '100%', // Full width on all screens
-            ml: isMobile ? '60px' : '0', // 60px margin only on mobile
-            transition: theme.transitions.create(['margin'], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
+            width: '100%',
+            ml: `${drawerWidth}px`, // Offset by sidebar width
+            minHeight: '100vh',
+            overflowY: 'auto', // Independent vertical scrolling
             backgroundColor: theme.palette.background.default,
           }}
         >
@@ -155,7 +156,7 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
             message={snackbar.message}
             severity={snackbar.severity}
           />
-          <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4 }}>
+          <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4, mb: 4 }}>
             <Outlet context={{ isMobile, drawerWidth, showSnackbar }} />
           </Container>
         </Box>

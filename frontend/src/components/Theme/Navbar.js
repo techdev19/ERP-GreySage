@@ -61,18 +61,19 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
     <Box
       sx={{
         width: drawerWidth,
-        height: '100vh', // Ensure full viewport height
+        height: '100%', // Inherit full height from viewport
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between', // Distribute space between top and bottom
+        justifyContent: 'space-between', // Push ThemeToggle to bottom
         backgroundColor: theme.palette.background.paper,
         transition: theme.transitions.create(['width'], {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
+        overflowX: 'hidden', // Prevent horizontal scrollbar
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 1, justifyContent: collapsed ? 'center' : 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', p: 1, justifyContent: collapsed ? 'center' : 'space-between', overflowX: 'hidden' }}>
         {!collapsed && (
           <Typography
             variant="h4"
@@ -80,7 +81,7 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
             sx={{
               pl: 2,
               whiteSpace: 'nowrap', // Prevents text wrapping
-              overflow: 'hidden', 
+              overflow: 'hidden',
             }}>
             G R E Y S A G E
           </Typography>
@@ -94,24 +95,24 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
         </IconButton>
       </Box>
       <Divider sx={{ backgroundColor: 'inherit', opacity: 1 }} />
-      <List sx={{ flexGrow: 1, overflow: 'auto' }}>
+      <List sx={{ flexGrow: 1, overflow: 'auto', overflowX: 'hidden', flexShrink: 0 }}>
         {navItems.map((item, index) => (
-          <ListItem key={index} disablePadding>
+          <ListItem key={index} disablePadding sx={{ overflowX: 'hidden' }}>
             <motion.div
               whileHover={{
-                y: [0, -2, 0], // Bounce sequence: start, up, down, slight up, back
-                x: [0, 2, 0],
+                y: [-4, 0], // Move up 4px and back to original position
                 transition: { duration: 0.3, easing: "ease-in-out" }, // Smooth ease-in-out transition
               }}
-              style={{ width: '100%' }} // Ensure it takes the full width of ListItemButton
+              style={{ width: '100%', overflowX: 'hidden' }}
             >
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => (item.path ? navigate(item.path) : item.onClick())}
                 sx={{
-                  backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'transparent', // Active color
+                  backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'transparent',
                   justifyContent: collapsed ? 'center' : 'flex-start',
                   px: collapsed ? 1 : 2,
+                  overflowX: 'hidden',
                 }}
                 disabled={item.path === '/invoices'}
               >
@@ -127,6 +128,7 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
                   primary={item.label}
                   sx={{
                     display: collapsed ? 'none' : 'block',
+                    overflowX: 'hidden',
                   }}
                 />
               </ListItemButton>
@@ -134,7 +136,7 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
           </ListItem>
         ))}
       </List>
-      <Box sx={{ p: 1, display: 'flex', justifyContent: collapsed ? 'center' : 'flex-end', gap: 1 }}>
+      <Box sx={{ p: 1, display: 'flex', justifyContent: collapsed ? 'center' : 'flex-end', gap: 1, overflowX: 'hidden' }}>
         {/* <FormControl size="small" sx={{ minWidth: collapsed ? 40 : 85 }}>
           <Select
             value={variant}
