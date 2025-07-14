@@ -127,7 +127,7 @@ function StitchingManagement() {
   };
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Stitching Management</Typography>
         {!order ? (<Skeleton animation="wave" variant="text" sx={{ marginBottom: 2, width: '60%' }} />) : (
@@ -183,7 +183,7 @@ function StitchingManagement() {
           editRecord={selectedWashingRecord}
         />
       </Paper>
-    </Container>
+    </>
   );
 }
 

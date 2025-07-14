@@ -58,7 +58,7 @@ function OrderManagement() {
   };
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Order Management</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -102,7 +102,7 @@ function OrderManagement() {
           order={editOrder}
         />
       </Paper>
-    </Container>
+    </>
   );
 }
 

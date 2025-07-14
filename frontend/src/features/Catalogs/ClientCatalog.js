@@ -144,7 +144,7 @@ function ClientCatalog() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Client Catalog</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -287,7 +287,7 @@ function ClientCatalog() {
           </Box>
         </Modal>
       </Paper>
-    </Container>
+    </>
   );
 }
 

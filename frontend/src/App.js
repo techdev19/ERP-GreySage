@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Box, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import { LicenseInfo } from '@mui/x-license';
+import { Box, Container, useMediaQuery, useTheme, IconButton } from '@mui/material';
 import { SnackBar } from './components/SnackBar';
 import "@fontsource/dm-sans";
 import "@fontsource/dm-sans/700.css";
@@ -40,6 +41,7 @@ const AdminLayout = () => (
 );
 
 const AuthenticatedLayout = ({ variant, setVariant }) => {
+  LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_LICENSE_KEY);
   const theme = useTheme();
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
@@ -153,7 +155,9 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
             message={snackbar.message}
             severity={snackbar.severity}
           />
-          <Outlet context={{ isMobile, drawerWidth, showSnackbar }} />
+          <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4 }}>
+            <Outlet context={{ isMobile, drawerWidth, showSnackbar }} />
+          </Container>
         </Box>
       </Box>
     </ProtectedRoute>

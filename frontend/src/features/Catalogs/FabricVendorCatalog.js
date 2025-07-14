@@ -112,7 +112,7 @@ function FabricVendorCatalog() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Fabric Vendor Catalog</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -225,7 +225,7 @@ function FabricVendorCatalog() {
           </Box>
         </Modal>
       </Paper>
-    </Container>
+    </>
   );
 }
 

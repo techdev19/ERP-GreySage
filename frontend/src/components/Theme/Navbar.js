@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, IconButton, Typography, FormControl, Select, MenuItem, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ThemeToggle from './ThemeToggle';
@@ -17,10 +17,12 @@ import ContentCutIcon from '@mui/icons-material/ContentCut';
 import LaundryIcon from '@mui/icons-material/LocalLaundryService';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { ShoppingCart as ShoppingCartIcon, Leaderboard as LeaderboardIcon } from '@mui/icons-material';
+import { motion } from 'motion/react'; // Import motion from @motionone/dom
 
 function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerToggle }) {
   const user = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
 
   const handleLogout = () => {
@@ -59,9 +61,10 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
     <Box
       sx={{
         width: drawerWidth,
-        height: '100vh',
+        height: '100vh', // Ensure full viewport height
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'space-between', // Distribute space between top and bottom
         backgroundColor: theme.palette.background.paper,
         transition: theme.transitions.create(['width'], {
           easing: theme.transitions.easing.sharp,
@@ -71,7 +74,14 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
     >
       <Box sx={{ display: 'flex', alignItems: 'center', p: 1, justifyContent: collapsed ? 'center' : 'space-between' }}>
         {!collapsed && (
-          <Typography variant="h4" sx={{ pl: 2 }}>
+          <Typography
+            variant="h4"
+            component='div'
+            sx={{
+              pl: 2,
+              whiteSpace: 'nowrap', // Prevents text wrapping
+              overflow: 'hidden', 
+            }}>
             G R E Y S A G E
           </Typography>
         )}
@@ -87,29 +97,40 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
       <List sx={{ flexGrow: 1, overflow: 'auto' }}>
         {navItems.map((item, index) => (
           <ListItem key={index} disablePadding>
-            <ListItemButton
-              onClick={() => (item.path ? navigate(item.path) : item.onClick())}
-              sx={{
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                px: collapsed ? 1 : 2,
+            <motion.div
+              whileHover={{
+                y: [0, -2, 0], // Bounce sequence: start, up, down, slight up, back
+                x: [0, 2, 0],
+                transition: { duration: 0.3, easing: "ease-in-out" }, // Smooth ease-in-out transition
               }}
-              disabled={item.path === '/invoices'}
+              style={{ width: '100%' }} // Ensure it takes the full width of ListItemButton
             >
-              <ListItemIcon
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => (item.path ? navigate(item.path) : item.onClick())}
                 sx={{
-                  minWidth: collapsed ? 'auto' : 30,
-                  color: 'inherit',
+                  backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'transparent', // Active color
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  px: collapsed ? 1 : 2,
                 }}
+                disabled={item.path === '/invoices'}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                sx={{
-                  display: collapsed ? 'none' : 'block',
-                }}
-              />
-            </ListItemButton>
+                <ListItemIcon
+                  sx={{
+                    minWidth: collapsed ? 'auto' : 30,
+                    color: 'inherit',
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  sx={{
+                    display: collapsed ? 'none' : 'block',
+                  }}
+                />
+              </ListItemButton>
+            </motion.div>
           </ListItem>
         ))}
       </List>

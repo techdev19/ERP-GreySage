@@ -112,7 +112,7 @@ function WashingVendorCatalog() {
   const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Washing Vendor Catalog</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
@@ -225,7 +225,7 @@ function WashingVendorCatalog() {
           </Box>
         </Modal>
       </Paper>
-    </Container>
+    </>
   );
 }
 
