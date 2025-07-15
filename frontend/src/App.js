@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { LicenseInfo } from '@mui/x-license';
-import { Box, Container, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import { Box, Stack, Container, useMediaQuery, useTheme, IconButton } from '@mui/material';
 import { SnackBar } from './components/SnackBar';
 import "@fontsource/dm-sans";
 import "@fontsource/dm-sans/700.css";
 import "@fontsource/dm-sans/400-italic.css";
 import "@fontsource/dm-sans/700-italic.css";
 import AppTheme from './components/Theme/AppTheme';
-import Navbar from './components/Theme/Navbar';
+import Sidebar from './components/Navbar/Sidebar';
 import Login from './features/Login/Login';
 import Register from './features/Login/Register';
 import UserManagement from './features/Admin/UserManagement';
@@ -24,6 +24,7 @@ import WashingVendorCatalog from './features/Catalogs/WashingVendorCatalog';
 import FinishingVendorCatalog from './features/Catalogs/FinishingVendorCatalog';
 import OrderManagement from './features/Orders/OrderManagement';
 import StitchingManagement from './features/Stitching/StitchingManagement';
+import Appbar from './components/Navbar/Appbar';
 // import WashingManagement from './features/Washing/WashingManagement';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -120,7 +121,7 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-            position: 'fixed', // Fixed position for both mobile and desktop
+            position: isMobile ? 'fixed' : 'static', // Fixed position for both mobile and desktop
             top: 0,
             bottom: 0,
             height: '100vh', // Full viewport height
@@ -129,7 +130,7 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
             overflowX: 'hidden', // Prevent horizontal scrollbar
           }}
         >
-          <Navbar
+          <Sidebar
             variant={variant}
             setVariant={setVariant}
             collapsed={collapsed}
@@ -137,15 +138,15 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
             handleDrawerToggle={handleDrawerToggle}
           />
         </Box>
-
-        {/* Main Content with independent scrolling */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
+            // p: 3,
             width: '100%',
-            ml: `${drawerWidth}px`, // Offset by sidebar width
+            mt: 2,
+            // ml: `${drawerWidth}px`, // Offset by sidebar width
+            ml: isMobile ? '60px' : '0', // Offset by sidebar width
             minHeight: '100vh',
             overflowY: 'auto', // Independent vertical scrolling
             backgroundColor: theme.palette.background.default,
@@ -156,9 +157,20 @@ const AuthenticatedLayout = ({ variant, setVariant }) => {
             message={snackbar.message}
             severity={snackbar.severity}
           />
-          <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4, mb: 4 }}>
-            <Outlet context={{ isMobile, drawerWidth, showSnackbar }} />
-          </Container>
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              mx: 3,
+              pb: 5,
+              // mt: { xs: 8, md: 0 },
+            }}
+          >
+            {/* <Appbar /> */}
+            <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4, mb: 4 }}>
+              <Outlet context={{ isMobile, drawerWidth, showSnackbar }} />
+            </Container>
+          </Stack>
         </Box>
       </Box>
     </ProtectedRoute>

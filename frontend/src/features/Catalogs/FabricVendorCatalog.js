@@ -113,8 +113,7 @@ function FabricVendorCatalog() {
 
   return (
     <>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4">Fabric Vendor Catalog</Typography>
+        <Typography variant="h4" sx={{ mb: 1 }}>Fabric Vendor Catalog</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
           <TextField
             label="Search"
@@ -224,7 +223,6 @@ function FabricVendorCatalog() {
             </Button>
           </Box>
         </Modal>
-      </Paper>
     </>
   );
 }

@@ -90,12 +90,12 @@ function Dashboard() {
     // <Container maxWidth={false} disableGutters={isMobile ? true : false} sx={{ mt: 4 }}>
     //   <Typography variant="h4">Welcome, {user.username} ({user.role})</Typography>
     // </>
-    <Paper sx={{ p: 3 }}>
+    <>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, }}>
           <Typography variant="h4">Dashboard</Typography>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }} sx={{ textAlign: 'center', mb: 2 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} sx={{ mb: 3, mt: 1, textAlign: 'center' }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateRangePicker
               // label='From Date'
@@ -103,8 +103,8 @@ function Dashboard() {
               onChange={(newValue) => setDateRange(newValue)}
               format='DD-MMM-YYYY'
               slots={{ textField: MorphDateTextField }}
-              sx={{ width: 260 }}
-              variant='standard'
+              slotProps={{ textField: { variant: 'standard', size: 'medium' } }}
+              sx={{ width: '95%' }}
             />
           </LocalizationProvider>
           {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -169,7 +169,7 @@ function Dashboard() {
               </Grid>
               <Copyright sx={{ my: 4 }} /> */}
       </Box>
-    </Paper>
+    </>
   );
 }
 

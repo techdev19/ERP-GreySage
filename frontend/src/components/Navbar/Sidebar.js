@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, IconButton, Typography, FormControl, Select, MenuItem, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from '../Theme/ThemeToggle';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -19,7 +19,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { ShoppingCart as ShoppingCartIcon, Leaderboard as LeaderboardIcon } from '@mui/icons-material';
 import { motion } from 'motion/react'; // Import motion from @motionone/dom
 
-function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerToggle }) {
+function Sidebar({ variant, setVariant, collapsed, setCollapsed, handleDrawerToggle }) {
   const user = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,7 +100,8 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
           <ListItem key={index} disablePadding sx={{ overflowX: 'hidden' }}>
             <motion.div
               whileHover={{
-                y: [-4, 0], // Move up 4px and back to original position
+                y: [0, -2, 0], // Move up 4px and back to original position
+                x: [0, 2, 0],
                 transition: { duration: 0.3, easing: "ease-in-out" }, // Smooth ease-in-out transition
               }}
               style={{ width: '100%', overflowX: 'hidden' }}
@@ -156,4 +157,4 @@ function Navbar({ variant, setVariant, collapsed, setCollapsed, handleDrawerTogg
   );
 }
 
-export default Navbar;
+export default Sidebar;

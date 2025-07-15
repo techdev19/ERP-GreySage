@@ -59,8 +59,9 @@ function OrderManagement() {
 
   return (
     <>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4">Order Management</Typography>
+      {/* <Paper sx={{ p: 3 }}> */}
+      <>
+        <Typography variant="h4" sx={{ mb: 1 }}>Order Management</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'right', mb: 2 }}>
           <TextField
             label="Search Orders"
@@ -101,7 +102,7 @@ function OrderManagement() {
           onUpdateOrder={onUpdateOrder}
           order={editOrder}
         />
-      </Paper>
+      </>
     </>
   );
 }
