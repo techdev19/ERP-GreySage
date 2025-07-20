@@ -133,7 +133,7 @@ function Dashboard() {
             <StatCard {...sinceInceptionData} />
           </Grid>}
           <Grid size={{ xs: 12, md: 12 }}>
-            <TotalQtyByClientBar />
+            <TotalQtyByClientBar dateRange={dateRange} />
           </Grid>
         </Grid>
       </Box>
