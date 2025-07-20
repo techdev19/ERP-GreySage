@@ -294,7 +294,7 @@ const getOrderStatusSummary = async (req, res) => {
       };
     }));
 
-  // Client-specific quantities and counts
+    // Client-specific quantities and counts
     let clientData = [];
     if (clientId && isValidObjectId(clientId)) {
       const client = await Client.findById(clientId).lean();
@@ -550,9 +550,34 @@ const getOrderStatusSummary = async (req, res) => {
       }).flat();
     }
 
+    // Calculate Overall Quantity Since Inception (unfiltered by date or client)
+    const overallSinceInception = await Order.aggregate([
+      { $match: { status: 5 } },
+      {
+        $group: {
+          _id: null,
+          totalQuantity: { $sum: '$finalTotalQuantity' },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    const sinceInceptionValue = overallSinceInception[0]?.totalQuantity || 0;
+    const sinceInceptionCount = overallSinceInception[0]?.count || 0;
+    const sinceInceptionTrend = await getMonthlyTrendData('2023-01-01', new Date().toISOString(), { title: 'Completed' }); // Use a broad range for trend
+
+    const sinceInceptionData = {
+      title: `Overall Completed (${sinceInceptionCount} orders)`,
+      value: sinceInceptionValue >= 1000 ? `${(sinceInceptionValue / 1000).toFixed(1)}k` : sinceInceptionValue.toString(),
+      interval: 'Since Inception',
+      trend: 'neutral', // Static trend as it's a cumulative total
+      data: sinceInceptionTrend.data,
+      labels: sinceInceptionTrend.labels
+    };
+
     res.json({
       overall: overallData,
-      byClient: clientData
+      byClient: clientData,
+      sinceInception: sinceInceptionData
     });
   } catch (error) {
     console.error(error);
@@ -602,7 +627,6 @@ const getProductionStages = async (req, res) => {
   try {
     const dateFilter = getDateRangeFilter(req.query);
 
-    // Stitching Count: Sum of quantity for lotId in Stitching but not in Washing
     const stitchingData = await Stitching.aggregate([
       { $match: dateFilter },
       {
@@ -623,7 +647,6 @@ const getProductionStages = async (req, res) => {
     ]);
     const stitchingCount = stitchingData[0]?.totalQuantity || 0;
 
-    // Washing Count: Sum of quantity from washDetails for lotId in Washing
     const washingData = await Washing.aggregate([
       { $match: dateFilter },
       { $unwind: '$washDetails' },
@@ -636,7 +659,6 @@ const getProductionStages = async (req, res) => {
     ]);
     const washingCount = washingData[0]?.totalQuantity || 0;
 
-    // Finishing Count: Sum of quantity for all lotId in Finishing
     const finishingData = await Finishing.aggregate([
       { $match: dateFilter },
       {
