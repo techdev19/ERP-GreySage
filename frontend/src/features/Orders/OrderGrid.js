@@ -1,17 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
-import {
-    TableContainer, Table, TableBody, TableCell, TableHead, TableRow,
-    Grid, Box, IconButton, Chip, Link, Typography,
-    Card, CardContent, Stack, Collapse, Button, useTheme, Select, Menu, MenuItem
-} from '@mui/material';
-import { Edit as EditIcon, CheckCircle, Cancel, ShoppingCartCheckout, ContentCut, LocalLaundryService, AutoAwesome, ExpandMore as ExpandMoreIcon, ArrowUpward, ArrowDownward, FilterList } from '@mui/icons-material';
-import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/SkeletonLoader';
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
+import { Link, IconButton, Chip, Box, Typography } from '@mui/material';
+import { Edit as EditIcon, CheckCircle, Cancel, ShoppingCartCheckout, ContentCut, LocalLaundryService, AutoAwesome } from '@mui/icons-material';
+import OrderGridSx from './OrderGridSx';
+import OrderGridMd from './OrderGridMd';
 
 function OrderGrid({ orders, search: globalSearch, onEditOrder }) {
     const navigate = useNavigate();
-    const theme = useTheme();
     const { isMobile } = useOutletContext();
     const [expandedRows, setExpandedRows] = useState({});
     const [sortBy, setSortBy] = useState('orderId'); // Default sort by Order ID
@@ -197,12 +193,9 @@ function OrderGrid({ orders, search: globalSearch, onEditOrder }) {
 
     const table = useReactTable({
         columns,
-        data: processedOrders, // Use processedOrders instead of raw orders
+        data: processedOrders,
         getCoreRowModel: getCoreRowModel(),
     });
-
-    const getHeaderContent = (column) => column.columnDef && column.columnDef.header ? column.columnDef.header.toUpperCase() : column.id;
-    const isColumnSortable = (column) => column.columnDef && column.columnDef.enableSorting === true;
 
     const toggleRowExpansion = (rowId) => {
         setExpandedRows((prev) => ({
@@ -211,255 +204,38 @@ function OrderGrid({ orders, search: globalSearch, onEditOrder }) {
         }));
     };
 
-    const toggleSortDirection = () => {
-        setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    };
-
-    const handleSortChange = (e) => {
-        setSortBy(e.target.value);
-        setSortDirection('asc'); // Reset to ascending when changing sort column
-    };
-
-    if (isMobile) {
-        return (
-            <Box sx={{ p: 1 }}>
-                <Grid container spacing={2} sx={{ mb: 2, justifyContent: 'flex-end' }}>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
-                            <Select
-                                variant="standard"
-                                size="small"
-                                value={sortBy}
-                                onChange={handleSortChange}
-                            >
-                                <MenuItem value="orderId">Sort By Order ID</MenuItem>
-                                <MenuItem value="date">Sort By Date</MenuItem>
-                                <MenuItem value="clientName">Sort By Client</MenuItem>
-                                <MenuItem value="fitStyleName">Sort By Fit Style</MenuItem>
-                                <MenuItem value="fabric">Sort By Fabric</MenuItem>
-                                <MenuItem value="status">Sort By Status</MenuItem>
-                            </Select>
-                            <IconButton
-                                onClick={toggleSortDirection}
-                                sx={{ ml: 1 }}
-                            >
-                                {sortDirection === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-                            </IconButton>
-                            <IconButton
-                                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
-                            >
-                                <FilterList />
-                            </IconButton>
-                            <Menu
-                                anchorEl={filterAnchorEl}
-                                open={Boolean(filterAnchorEl)}
-                                onClose={() => setFilterAnchorEl(null)}
-                            >
-                                <MenuItem onClick={() => { setFilterStatus(''); setFilterAnchorEl(null); }}>All</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('placed'); setFilterAnchorEl(null); }}>Placed</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('stitching'); setFilterAnchorEl(null); }}>Stitching</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('washing'); setFilterAnchorEl(null); }}>Washing</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('finishing'); setFilterAnchorEl(null); }}>Finishing</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('complete'); setFilterAnchorEl(null); }}>Complete</MenuItem>
-                                <MenuItem onClick={() => { setFilterStatus('cancelled'); setFilterAnchorEl(null); }}>Cancelled</MenuItem>
-                            </Menu>
-                        </Stack>
-                    </Grid>
-                </Grid>
-                {!processedOrders ? (
-                    <TableRowsLoader colsNum={1} rowsNum={10} />
-                ) : processedOrders.length > 0 ? (
-                    processedOrders.map((order) => (
-                        <Card key={order._id} variant="outlined" sx={{ mb: 2, boxShadow: 1, backgroundColor: `${theme.palette.background.paper} !important`  }}>
-                            <CardContent sx={{ p: 2 }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold">
-                                        <Link
-                                            component="button"
-                                            onClick={() => navigate(`/stitching/${order._id}`)}
-                                            sx={{ textDecoration: 'underline' }}
-                                        >
-                                            {order.orderId}
-                                        </Link>
-                                    </Typography>
-                                    <IconButton onClick={() => toggleRowExpansion(order._id)} size="small">
-                                        <ExpandMoreIcon sx={{ transform: expandedRows[order._id] ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-                                    </IconButton>
-                                </Stack>
-                                <Stack spacing={1} sx={{ mt: 1 }}>
-                                    <Typography variant="body2">
-                                        <strong>Client:</strong> {order.clientId?.name || 'N/A'}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <strong>Status:</strong>{' '}
-                                        <Chip
-                                            icon={statusIcons[order.status]}
-                                            label={statusLabels[order.status] || 'Unknown'}
-                                            color={
-                                                order.status === 1 ? 'primary' :
-                                                    order.status === 2 ? 'primary' :
-                                                        order.status === 3 ? 'primary' :
-                                                            order.status === 4 ? 'primary' :
-                                                                order.status === 5 ? 'primary' :
-                                                                    order.status === 6 ? 'secondary' : 'default'
-                                            }
-                                            sx={{ ml: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                        />
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        <strong>Quantity:</strong> {order.totalQuantity}
-                                    </Typography>
-                                </Stack>
-                                <Collapse in={expandedRows[order._id]}>
-                                    <Stack spacing={1} sx={{ mt: 2 }}>
-                                        <Typography variant="body2">
-                                            <strong>Date:</strong> {new Date(order.date).toLocaleDateString()}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Fit Style:</strong> {order.fitStyleId?.name || 'N/A'}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Fabric:</strong> {order.fabric}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Waist Size:</strong> {order.waistSize}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Final Qty:</strong> {order.finalTotalQuantity}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Threads:</strong>
-                                            {order.threadColors.map((tc, index) => (
-                                                <Box key={index} component="span" sx={{ display: 'block' }}>
-                                                    {tc.color}, {tc.quantity} pcs
-                                                </Box>
-                                            ))}
-                                        </Typography>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<EditIcon />}
-                                            onClick={() => onEditOrder(order)}
-                                            size="small"
-                                            sx={{ mt: 1 }}
-                                        >
-                                            Edit
-                                        </Button>
-                                    </Stack>
-                                </Collapse>
-                            </CardContent>
-                        </Card>
-                    ))
-                ) : (
-                    <NoRecordRow />
-                )}
-            </Box>
-        );
-    }
-
-    return (
-        <TableContainer>
-            <Table>
-                <TableHead>
-                    <TableRow sx={{ backgroundColor: theme.palette.background.paper }}>
-                        <TableCell colSpan={columns.length} sx={{ p: 0.5 }}>
-                            <Grid container spacing={2} sx={{ justifyContent: 'flex-end' }}>
-                                <Grid item xs={12} sm={6} md={4}>
-                                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
-                                        <Select
-                                            variant="standard"
-                                            size="small"
-                                            value={sortBy}
-                                            onChange={handleSortChange}
-                                            sx={{ minWidth: 120 }}
-                                        >
-                                            <MenuItem value="orderId">Order ID</MenuItem>
-                                            <MenuItem value="date">Date</MenuItem>
-                                            <MenuItem value="clientName">Client</MenuItem>
-                                            <MenuItem value="fitStyleName">Fit Style</MenuItem>
-                                            <MenuItem value="fabric">Fabric</MenuItem>
-                                            <MenuItem value="status">Status</MenuItem>
-                                        </Select>
-                                        <IconButton
-                                            color="primary"
-                                            size="small"
-                                            onClick={toggleSortDirection}
-                                            sx={{ ml: 1 }}
-                                        >
-                                            {sortDirection === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-                                        </IconButton>
-                                        <Button
-                                            variant="standard"
-                                            size="small"
-                                            startIcon={<FilterList />}
-                                            onClick={(e) => setFilterAnchorEl(e.currentTarget)}
-                                        >
-                                            Filter
-                                        </Button>
-                                        <Menu
-                                            anchorEl={filterAnchorEl}
-                                            open={Boolean(filterAnchorEl)}
-                                            onClose={() => setFilterAnchorEl(null)}
-                                        >
-                                            <MenuItem onClick={() => { setFilterStatus(''); setFilterAnchorEl(null); }}>All</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('placed'); setFilterAnchorEl(null); }}>Placed</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('stitching'); setFilterAnchorEl(null); }}>Stitching</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('washing'); setFilterAnchorEl(null); }}>Washing</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('finishing'); setFilterAnchorEl(null); }}>Finishing</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('complete'); setFilterAnchorEl(null); }}>Complete</MenuItem>
-                                            <MenuItem onClick={() => { setFilterStatus('cancelled'); setFilterAnchorEl(null); }}>Cancelled</MenuItem>
-                                        </Menu>
-                                    </Stack>
-                                </Grid>
-                            </Grid>
-                        </TableCell>
-                    </TableRow>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map(colHeader => (
-                                <TableCell
-                                    key={colHeader.column.id}
-                                    onClick={() => {
-                                        if (isColumnSortable(colHeader.column)) {
-                                            setSortBy(colHeader.column.id);
-                                            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-                                        }
-                                    }}
-                                    style={{
-                                        cursor: isColumnSortable(colHeader.column) ? 'pointer' : 'default',
-                                        textAlign: (colHeader.column.id === 'status' || colHeader.column.id === 'actions') ? 'center' : 'left',
-                                    }}
-                                >
-                                    {flexRender(getHeaderContent(colHeader.column), colHeader.getContext())}
-                                    {sortBy === colHeader.column.id ? (sortDirection === 'desc' ? ' 🔽' : ' 🔼') : ''}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHead>
-                <TableBody>
-                    {!processedOrders ? (
-                        <TableRowsLoader colsNum={11} rowsNum={10} />
-                    ) : processedOrders.length > 0 ? (
-                        processedOrders.map(row => (
-                            <TableRow key={row._id}>
-                                {table.getRowModel().rows.find(r => r.original._id === row._id)?.getVisibleCells().map(cell => (
-                                    <TableCell
-                                        key={cell.id}
-                                        style={{
-                                            textAlign: (cell.column.id === 'totalQuantity' || cell.column.id === 'finalTotalQuantity' || cell.column.id === 'status' || cell.column.id === 'actions') ? 'center' : 'left',
-                                        }}
-                                    >
-                                        {flexRender(cell.column.columnDef.cell || cell.getValue(), cell.getContext())}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))
-                    ) : (
-                        <NoRecordRow />
-                    )}
-                </TableBody>
-            </Table>
-        </TableContainer>
+    return isMobile ? (
+        <OrderGridSx
+            processedOrders={processedOrders}
+            navigate={navigate}
+            expandedRows={expandedRows}
+            toggleRowExpansion={toggleRowExpansion}
+            statusLabels={statusLabels}
+            statusIcons={statusIcons}
+            onEditOrder={onEditOrder}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortDirection={sortDirection}
+            setSortDirection={setSortDirection}
+            filterAnchorEl={filterAnchorEl}
+            setFilterAnchorEl={setFilterAnchorEl}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+        />
+    ) : (
+        <OrderGridMd
+            processedOrders={processedOrders}
+            columns={columns}
+            table={table}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            setSortBy={setSortBy}
+            setSortDirection={setSortDirection}
+            filterAnchorEl={filterAnchorEl}
+            setFilterAnchorEl={setFilterAnchorEl}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+        />
     );
 }
 
