@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Card, CardContent, Stack, Collapse, Button, IconButton, Chip, Link, Typography, useTheme, Grid, Select, MenuItem, Menu } from '@mui/material';
 import { Edit as EditIcon, ExpandMore as ExpandMoreIcon, ArrowUpward, ArrowDownward, FilterList } from '@mui/icons-material';
-import { TableRowsLoader, NoRecordRow } from '../../components/Skeleton/SkeletonLoader';
+import { OrderCardsLoader, NoRecordRow } from '../../components/Skeleton/SkeletonLoader';
 
 function OrderGridSx({ processedOrders, navigate, expandedRows, toggleRowExpansion, statusLabels, statusIcons, onEditOrder, sortBy, setSortBy, sortDirection, setSortDirection, filterAnchorEl, setFilterAnchorEl, filterStatus, setFilterStatus }) {
     const theme = useTheme();
@@ -54,9 +54,7 @@ function OrderGridSx({ processedOrders, navigate, expandedRows, toggleRowExpansi
                     </Stack>
                 </Grid>
             </Grid>
-            {!processedOrders ? (
-                <TableRowsLoader colsNum={1} rowsNum={10} />
-            ) : processedOrders.length > 0 ? (
+            {processedOrders.length > 0 ? (
                 processedOrders.map((order) => (
                     <Card key={order._id} variant="outlined" sx={{ pt: 1, mb: 2, boxShadow: 1, backgroundColor: `${theme.palette.background.paper} !important` }}>
                         <CardContent>
@@ -94,7 +92,6 @@ function OrderGridSx({ processedOrders, navigate, expandedRows, toggleRowExpansi
                                 <Typography variant="body2">
                                     <strong>Client:</strong> {order.clientId?.name || 'N/A'}
                                 </Typography>
-                                
                                 <Typography variant="body2">
                                     <strong>Quantity:</strong> {order.totalQuantity}
                                 </Typography>
@@ -139,7 +136,7 @@ function OrderGridSx({ processedOrders, navigate, expandedRows, toggleRowExpansi
                     </Card>
                 ))
             ) : (
-                <NoRecordRow />
+                <OrderCardsLoader />
             )}
         </Box>
     );
